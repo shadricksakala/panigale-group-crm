@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getPanigaleCrmUser, assertCrmMutation } from "../../../../lib/server/panigale-auth.mjs";
-import { archiveCrmRecord, createCrmRecord, createCrmUnit, crmContext, grantCrmMember, readCrmResource, replaceCrmProjectMembers, revokeCrmMember, updateCrmRecord, deactivateCrmUnit } from "../../../../lib/server/crm.mjs";
+import { archiveCrmRecord, archiveCrmStage, createCrmRecord, createCrmStage, createCrmUnit, crmContext, grantCrmMember, readCrmResource, replaceCrmProjectMembers, revokeCrmMember, updateCrmRecord, updateCrmStage, deactivateCrmUnit } from "../../../../lib/server/crm.mjs";
 
 type RouteContext = { params: Promise<{ resource: string }> };
 const json = (data: unknown, status=200) => Response.json(data,{status,headers:{"cache-control":"no-store"}});
@@ -30,12 +30,14 @@ export async function POST(request:Request,{params}:RouteContext) {
     if(resource==="members")return json({member:await grantCrmMember(env.CRM_DB,context,user,input)},201);
     if(resource==="units")return json({unit:await createCrmUnit(env.CRM_DB,context,user,input)},201);
     if(resource==="project_members")return json({team:await replaceCrmProjectMembers(env.CRM_DB,context,user,input)});
+    if(resource==="stages")return json({stage:await createCrmStage(env.CRM_DB,context,user,input)},201);
     return json({record:await createCrmRecord(env.CRM_DB,context,user,resource,input)},201);
   }catch(error){return fail(error,"Unable to save CRM record.");}
 }
 export async function PATCH(request:Request,{params}:RouteContext) {
   try { await assertCrmMutation(request,env);const [{resource},{user,context}]=await Promise.all([params,authenticate(request)]);const input=await readInput(request);
     if(resource==="members")return json({member:await grantCrmMember(env.CRM_DB,context,user,input)});
+    if(resource==="stages")return json({stage:await updateCrmStage(env.CRM_DB,context,user,String(input.id||""),input)});
     return json({record:await updateCrmRecord(env.CRM_DB,context,user,resource,String(input.id||""),input)});
   }catch(error){return fail(error,"Unable to update CRM record.");}
 }
@@ -43,6 +45,7 @@ export async function DELETE(request:Request,{params}:RouteContext) {
   try { await assertCrmMutation(request,env);const [{resource},{user,context}]=await Promise.all([params,authenticate(request)]);const input=await readInput(request);
     if(resource==="members")return json(await revokeCrmMember(env.CRM_DB,context,user,String(input.userId||input.id||"")));
     if(resource==="units")return json(await deactivateCrmUnit(env.CRM_DB,context,user,String(input.id||"")));
+    if(resource==="stages")return json(await archiveCrmStage(env.CRM_DB,context,user,String(input.id||"")));
     return json(await archiveCrmRecord(env.CRM_DB,context,user,resource,String(input.id||"")));
   }catch(error){return fail(error,"Unable to update CRM record.");}
 }
