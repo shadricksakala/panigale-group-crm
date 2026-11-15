@@ -197,12 +197,14 @@ export function CrmApp() {
   const [detailType, setDetailType] = useState<"contact" | "company" | "project" | "lead" | null>(null);
   const [contactMode, setContactMode] = useState("All");
   const [moreOpen, setMoreOpen] = useState(false);
+  const [mobileSearchOpen,setMobileSearchOpen]=useState(false);
   const [remindersOpen,setRemindersOpen]=useState(false);
   const [unitForForm, setUnitForForm] = useState("");
   const [selectedProposal, setSelectedProposal] = useState<Row | null>(null);
   const [csvTarget,setCsvTarget]=useState<"contacts"|"leads"|null>(null);
   const [stageManagerOpen,setStageManagerOpen]=useState(false);
   const searchInput=useRef<HTMLInputElement>(null);
+  const mobileSearchInput=useRef<HTMLInputElement>(null);
 
   const suffix = useMemo(() => queryString(selectedTenant || context?.tenant?.id || "", selectedUnit), [selectedTenant, context?.tenant?.id, selectedUnit]);
   const isSuperadmin = context?.role === "superadmin";
@@ -261,12 +263,21 @@ export function CrmApp() {
   useEffect(() => {
     const focusSearch=(event:KeyboardEvent)=>{
       if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="k"){
-        event.preventDefault();searchInput.current?.focus();searchInput.current?.select();
+        event.preventDefault();
+        if(window.matchMedia("(max-width: 900px)").matches)setMobileSearchOpen(true);
+        else{searchInput.current?.focus();searchInput.current?.select();}
       }
     };
     window.addEventListener("keydown",focusSearch);
     return ()=>window.removeEventListener("keydown",focusSearch);
   },[]);
+  useEffect(()=>{
+    if(!mobileSearchOpen)return;
+    mobileSearchInput.current?.focus();
+    const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setMobileSearchOpen(false);};
+    window.addEventListener("keydown",closeOnEscape);
+    return ()=>window.removeEventListener("keydown",closeOnEscape);
+  },[mobileSearchOpen]);
 
   const canSeeFinancials = Boolean(isSuperadmin || (selectedUnit ? currentUnit?.can_view_financials === 1 : context?.units.length && context?.units.every(unit => unit.can_view_financials === 1)));
   const queryMatch = <T extends Row>(rows: T[], fields: string[]) => {
@@ -453,9 +464,12 @@ export function CrmApp() {
         <div className="crm-select-wrap"><span>Business unit</span><select aria-label="Business unit" value={selectedUnit} onChange={event => setSelectedUnit(event.target.value)}><option value="">All my units</option>{context.units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></div>
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
+        <button className="crm-icon-button crm-mobile-search-trigger" title="Search CRM" aria-label="Search CRM" aria-haspopup="dialog" aria-expanded={mobileSearchOpen} onClick={()=>setMobileSearchOpen(true)}><Search size={18}/></button>
         <div className="crm-reminder-wrap"><button className="crm-icon-button crm-reminder-button" title="Task reminders" aria-label={`Task reminders${dueTasks?`, ${dueTasks} due`:""}`} aria-haspopup="dialog" aria-expanded={remindersOpen} onClick={()=>setRemindersOpen(value=>!value)}><Bell size={18}/>{dueTasks>0&&<span className="crm-reminder-count">{dueTasks>99?"99+":dueTasks}</span>}</button>{remindersOpen&&<section className="crm-reminder-panel" role="dialog" aria-label="Task reminders"><div className="crm-card-head"><div><h2>Task reminders</h2><p>{taskReminders.length?`${dueTasks} overdue or due in 7 days${dueTasks>taskReminders.length?" · showing 20":""}`:"All caught up"}</p></div><button className="crm-icon-button" aria-label="Close reminders" onClick={()=>setRemindersOpen(false)}><X size={15}/></button></div>{taskReminders.length?taskReminders.map(task=>{const date=String(task.due_at).slice(0,10),today=new Date().toISOString().slice(0,10),overdue=date<today;return <button className="crm-reminder-item" key={task.id} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}><span className={`crm-metric-icon ${overdue?"tone-red":"tone-gold"}`}><Clock3 size={15}/></span><span className="crm-list-content"><strong>{task.title}</strong><span>{task.company_name||task.contact_name||task.project_name||titleCase(task.kind)} · {task.owner_name||"Unassigned"}</span></span><span className={`crm-pill ${overdue?"red":"gold"}`}>{overdue?"Overdue":date===today?"Today":fmtDate(date)}</span></button>;}):<p className="crm-reminder-empty">No open tasks are due this week.</p>}<button className="crm-panel-link" style={{width:"100%",justifyContent:"center",marginTop:8}} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}>View all tasks <ArrowRight size={14}/></button></section>}</div>
         <div className="crm-account"><span className="crm-avatar">{initials(context.user.name)}</span><span className="crm-account-copy"><strong style={{ fontSize: 12 }}>{context.user.name}</strong><small style={{ color: "var(--muted)", fontSize: 10 }}>{currentUnit?.name || "Panigale Group"}</small></span><ChevronDown size={14}/></div>
       </header>
+
+      {mobileSearchOpen&&<div className="crm-mobile-search-overlay" onClick={event=>{if(event.target===event.currentTarget)setMobileSearchOpen(false);}}><section className="crm-mobile-search-panel" role="dialog" aria-modal="true" aria-label="Search CRM"><label className="crm-mobile-search-field"><Search size={19}/><input ref={mobileSearchInput} aria-label="Search CRM records" placeholder={searchPlaceholder} value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")setMobileSearchOpen(false);}}/><button className="crm-icon-button" aria-label="Close search" onClick={()=>setMobileSearchOpen(false)}><X size={17}/></button></label><p>Searching {pageTitle.toLowerCase()} in {currentUnit?.name||"all assigned units"}</p></section></div>}
 
       <main className="crm-content">
         {error && <div role="alert" className="crm-alert" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>{error}<button aria-label="Dismiss" onClick={() => setError("")}><X size={15}/></button></div>}
