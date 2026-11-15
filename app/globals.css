@@ -60,6 +60,17 @@ a { color: inherit; }
 .crm-search input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
 .crm-icon-button { display: grid; width: 42px; height: 42px; flex: none; place-items: center; border: 1px solid transparent; border-radius: 11px; color: #53627a; background: transparent; }
 .crm-icon-button:hover { border-color: var(--line); background: #f7f9fc; }
+.crm-reminder-wrap { position: relative; flex: none; }
+.crm-reminder-count { position: absolute; top: -3px; right: -4px; display: grid; min-width: 18px; height: 18px; place-items: center; border: 2px solid #fff; border-radius: 99px; padding: 0 4px; color: #fff; background: #e45656; font-size: 9px; font-weight: 750; }
+.crm-reminder-panel { position: absolute; top: calc(100% + 10px); right: -12px; z-index: 60; width: min(390px,calc(100vw - 24px)); max-height: min(70vh,560px); overflow: auto; border: 1px solid var(--line); border-radius: 16px; padding: 15px; background: #fff; box-shadow: 0 18px 55px #10284a26; }
+.crm-reminder-panel .crm-card-head { margin-bottom: 10px; }
+.crm-reminder-panel .crm-card-head h2 { margin: 0; font-size: 15px; }
+.crm-reminder-panel .crm-card-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+.crm-reminder-item { display: flex; width: 100%; align-items: center; gap: 10px; border: 0; border-top: 1px solid #edf0f5; padding: 10px 2px; color: var(--ink); background: #fff; text-align: left; }
+.crm-reminder-item:hover { background: #f8faff; }
+.crm-reminder-item .crm-list-content { min-width: 0; flex: 1; }
+.crm-reminder-item .crm-list-content strong,.crm-reminder-item .crm-list-content span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crm-reminder-empty { margin: 14px 4px; color: var(--muted); font-size: 12px; text-align: center; }
 .crm-account { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .crm-account-copy { display: grid; gap: 2px; }
 .crm-content { max-width: 1640px; margin: 0 auto; padding: 27px 30px 52px; }
@@ -223,6 +234,8 @@ a { color: inherit; }
   .crm-topbar .crm-select-wrap { max-width: 116px; }
   .crm-topbar .crm-select-wrap select { max-width: 116px; font-size: 10px; }
   .crm-account-copy, .crm-topbar .crm-icon-button { display: none; }
+  .crm-topbar .crm-reminder-button { display: grid; width: 35px; height: 35px; }
+  .crm-reminder-panel { right: -40px; }
   .crm-topbar .crm-avatar { width: 31px; height: 31px; }
   .crm-content { padding: 20px 12px 26px; }
   .crm-page-head { align-items: flex-start; margin-bottom: 17px; }
