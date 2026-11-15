@@ -22,6 +22,16 @@ Keep integration contracts explicit and avoid coupling the new CRM deployment to
 
 The standalone runtime uses React 19, Next-compatible routes on Vinext/Vite, and Cloudflare Workers, following the PaniPay application stack. Authentication is an OIDC client integration with Panigale Auth; credentials and identity lifecycle stay in that provider. The CRM verifies ID tokens and owns only its app session, tenant memberships, relationship data, and audit trail. The CRM does not bind to the PaniPay D1 database or read PaniPay identity tables.
 
+### Panigale Auth contract
+
+The CRM is a public OIDC client using authorization code with PKCE S256; it does not use a client secret. Register the exact callback URL `https://crm.panigale.tech/api/auth/callback` in Panigale Auth and configure the resulting client ID as `PANIGALE_AUTH_CLIENT_ID`. The CRM uses these issuer endpoints directly:
+
+- `GET /api/oidc/authorize` with `openid profile email`, `state`, `nonce`, and an S256 challenge.
+- `POST /api/oidc/token` with the one-time code, exact callback URL, and PKCE verifier.
+- `GET /api/oidc/jwks` to verify the RS256 signature.
+
+The CRM requires an ID token with `token_use=id`, the exact issuer and client audience, a valid time window, the login nonce, a stable `sub`, and `email_verified=true`. It then creates its own 14-day CRM session; Panigale Auth cookies are never shared with the CRM. CRM membership and unit access are provisioned separately and do not follow automatically from an Auth account. Identity sign-in and email delivery still require the Panigale Auth staging flow to pass its own release checks.
+
 ## Local setup
 
 1. Install Node 22.13 or newer and dependencies with `npm ci`.
