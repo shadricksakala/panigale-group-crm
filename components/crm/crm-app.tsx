@@ -210,6 +210,7 @@ export function CrmApp() {
   const isSuperadmin = context?.role === "superadmin";
   const canManageAccess = isSuperadmin || context?.role === "unit_manager";
   const currentUnit = context?.units.find(unit => unit.id === selectedUnit);
+  const productHref = safeExternalHref(currentUnit?.website);
 
   const load = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -475,7 +476,7 @@ export function CrmApp() {
       <main className="crm-content">
         {error && <div role="alert" className="crm-alert" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>{error}<button aria-label="Dismiss" onClick={() => setError("")}><X size={15}/></button></div>}
         {notice && <div role="status" className="crm-notice" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>{notice}<button aria-label="Dismiss" onClick={() => setNotice("")}><X size={15}/></button></div>}
-        <div className="crm-page-head"><div><p className="crm-eyebrow">{currentUnit?.name || "Panigale Group"}</p><h1>{module === "overview" ? `Good morning, ${context.user.name.split(" ")[0]}` : pageTitle}</h1><p>{module === "overview" ? "Here’s what’s happening across your customer relationships today." : pageSubtitle}</p></div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"flex-end",gap:8}}>{module==="pipeline"&&(isSuperadmin||context.role==="unit_manager")&&<button className="crm-secondary" onClick={()=>setStageManagerOpen(true)}><Settings2 size={16}/>Manage stages</button>}{visibleMainAction && <button className="crm-primary" onClick={() => openCreate(visibleMainAction[0])}><Plus size={17}/>{visibleMainAction[1]}</button>}</div></div>
+        <div className="crm-page-head"><div><p className="crm-eyebrow">{currentUnit?.name || "Panigale Group"}</p><h1>{module === "overview" ? `Good morning, ${context.user.name.split(" ")[0]}` : pageTitle}</h1><p>{module === "overview" ? "Here’s what’s happening across your customer relationships today." : pageSubtitle}</p></div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"flex-end",gap:8}}>{productHref&&<a className="crm-secondary" href={productHref} target="_blank" rel="noopener noreferrer" aria-label={`Open ${currentUnit?.name} product`}><ExternalLink size={15}/>Open product</a>}{module==="pipeline"&&(isSuperadmin||context.role==="unit_manager")&&<button className="crm-secondary" onClick={()=>setStageManagerOpen(true)}><Settings2 size={16}/>Manage stages</button>}{visibleMainAction && <button className="crm-primary" onClick={() => openCreate(visibleMainAction[0])}><Plus size={17}/>{visibleMainAction[1]}</button>}</div></div>
 
         {module === "overview" && <OverviewView data={data} currentUserId={context.user.id} stageRows={stageRows} pipeline={openPipelineMinor} activeProjects={activeProjects} dueTasks={dueTasks} outstanding={outstandingMinor} canSeeFinancials={canSeeFinancials} onNavigate={setActiveModule} onSelectTask={() => setActiveModule("tasks")}/>}
         {module === "contacts" && <ContactsView mode={contactMode} setMode={setContactMode} companies={visibleCompanies} contacts={visibleContacts} rows={shownContacts} allCompanies={data.companies.length} onCreate={openCreate} onImportCsv={()=>setCsvTarget("contacts")} onSelect={(row, kind) => { setDetail(row); setDetailType(kind); }} search={search}/>}
