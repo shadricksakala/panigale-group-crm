@@ -43,7 +43,7 @@ export async function PATCH(request:Request,{params}:RouteContext) {
 }
 export async function DELETE(request:Request,{params}:RouteContext) {
   try { await assertCrmMutation(request,env);const [{resource},{user,context}]=await Promise.all([params,authenticate(request)]);const input=await readInput(request);
-    if(resource==="members")return json(await revokeCrmMember(env.CRM_DB,context,user,String(input.userId||input.id||"")));
+    if(resource==="members")return json(await revokeCrmMember(env.CRM_DB,context,user,String(input.userId||input.id||""),Array.isArray(input.unitIds)?input.unitIds:[]));
     if(resource==="units")return json(await deactivateCrmUnit(env.CRM_DB,context,user,String(input.id||"")));
     if(resource==="stages")return json(await archiveCrmStage(env.CRM_DB,context,user,String(input.id||"")));
     return json(await archiveCrmRecord(env.CRM_DB,context,user,resource,String(input.id||"")));
