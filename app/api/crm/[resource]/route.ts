@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getPanigaleCrmUser, assertCrmMutation } from "../../../../lib/server/panigale-auth.mjs";
-import { archiveCrmRecord, createCrmRecord, createCrmUnit, crmContext, grantCrmMember, readCrmResource, revokeCrmMember, updateCrmRecord, deactivateCrmUnit } from "../../../../lib/server/crm.mjs";
+import { archiveCrmRecord, createCrmRecord, createCrmUnit, crmContext, grantCrmMember, readCrmResource, replaceCrmProjectMembers, revokeCrmMember, updateCrmRecord, deactivateCrmUnit } from "../../../../lib/server/crm.mjs";
 
 type RouteContext = { params: Promise<{ resource: string }> };
 const json = (data: unknown, status=200) => Response.json(data,{status,headers:{"cache-control":"no-store"}});
@@ -29,6 +29,7 @@ export async function POST(request:Request,{params}:RouteContext) {
   try { await assertCrmMutation(request,env);const [{resource},{user,context}]=await Promise.all([params,authenticate(request)]);const input=await readInput(request);
     if(resource==="members")return json({member:await grantCrmMember(env.CRM_DB,context,user,input)},201);
     if(resource==="units")return json({unit:await createCrmUnit(env.CRM_DB,context,user,input)},201);
+    if(resource==="project_members")return json({team:await replaceCrmProjectMembers(env.CRM_DB,context,user,input)});
     return json({record:await createCrmRecord(env.CRM_DB,context,user,resource,input)},201);
   }catch(error){return fail(error,"Unable to save CRM record.");}
 }
