@@ -12,7 +12,7 @@
     {
       "binding": "CRM_DB",
       "database_name": "panigale-group-crm-production",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5f90c9cc-24e5-4e85-b9e9-8446d7a8fd5b",
       "migrations_dir": "crm-migrations"
     }
   ],
