@@ -24,7 +24,7 @@ The standalone runtime uses React 19, Next-compatible routes on Vinext/Vite, and
 
 ### Panigale Auth contract
 
-The CRM is a public OIDC client using authorization code with PKCE S256; it does not use a client secret. Register the exact callback URL `https://crm.panigale.tech/api/auth/callback` in Panigale Auth and configure the resulting client ID as `PANIGALE_AUTH_CLIENT_ID`. The CRM uses these issuer endpoints directly:
+The CRM is a public OIDC client using authorization code with PKCE S256; it does not use a client secret. Its active Panigale Auth app is `PANIPAY-CRM`, with the exact callback URL `https://crm.panigale.tech/api/auth/callback` and scopes `openid profile email`. The public client ID is configured as the non-secret `PANIGALE_AUTH_CLIENT_ID` Worker variable. The CRM uses these issuer endpoints directly:
 
 - `GET /api/oidc/authorize` with `openid profile email`, `state`, `nonce`, and an S256 challenge.
 - `POST /api/oidc/token` with the one-time code, exact callback URL, and PKCE verifier.
@@ -43,7 +43,7 @@ The first successful login by the configured bootstrap owner claims the one-time
 
 ## Production provisioning and release
 
-The checked-in `wrangler.production.jsonc` intentionally has an all-zero D1 database ID. Before deployment, provision the dedicated D1 database and R2 document bucket, put the actual D1 ID in the Worker config, configure the Panigale Auth client with `https://crm.panigale.tech/api/auth/callback`, and set `PANIGALE_AUTH_CLIENT_ID` and the temporary `CRM_BOOTSTRAP_OWNER_EMAIL` with Cloudflare Worker secrets. Never put secret values in Wrangler vars, source, or Git. The CRM does not bind to PaniPay `DB` or read its user tables.
+The checked-in `wrangler.production.jsonc` intentionally has an all-zero D1 database ID. Before deployment, provision the dedicated D1 database and R2 document bucket, put the actual D1 ID in the Worker config, and set the temporary `CRM_BOOTSTRAP_OWNER_EMAIL` as a Cloudflare Worker secret. The OIDC client ID is public and belongs in Wrangler vars; never put secret values in Wrangler vars, source, or Git. The CRM does not bind to PaniPay `DB` or read its user tables.
 
 Back up D1 before every production migration. Use Cloudflare D1 point-in-time recovery or an encrypted D1 export stored outside the Worker deployment, and retain a separate R2 backup of `panigale-group-crm-documents-production`. Restore rehearsal and identity, authorization, CRUD, document, mobile, health, and unit-isolation checks must pass in a non-production environment before exposing the custom domain. Keep `https://panipay.panigale.tech/crm` available until a deliberate cutover has passed the full checklist. No DNS change, old CRM removal, or data migration is part of local setup.
 
