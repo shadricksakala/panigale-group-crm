@@ -22,7 +22,7 @@ function fail(error:unknown,fallback:string) {
   return json({error:fallback},500);
 }
 export async function GET(request:Request,{params}:RouteContext) {
-  try { const [{resource},{context,url}]=await Promise.all([params,authenticate(request)]);return json({data:await readCrmResource(env.CRM_DB,context,resource,url.searchParams.get("unitId")||"")}); }
+  try { const [{resource},{context,url}]=await Promise.all([params,authenticate(request)]);return json({data:await readCrmResource(env.CRM_DB,context,resource,url.searchParams.get("unitId")||"",url.searchParams.get("documentGroupId")||"")}); }
   catch(error){return fail(error,"Unable to load CRM data.");}
 }
 export async function POST(request:Request,{params}:RouteContext) {
