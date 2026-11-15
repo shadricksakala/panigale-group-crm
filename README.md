@@ -18,16 +18,32 @@ The dedicated CRM repo is the workspace for CRM changes. Related source reposito
 
 Keep integration contracts explicit and avoid coupling the new CRM deployment to arbitrary files in another checkout. The independent runtime must not assume those local folders exist in production.
 
-## Current integration dependencies
+## Standalone runtime
 
-The extracted routes still use PaniPay infrastructure:
+The standalone runtime uses React 19, Next-compatible routes on Vinext/Vite, and Cloudflare Workers, following the PaniPay application stack. Authentication is an OIDC client integration with Panigale Auth; credentials and identity lifecycle stay in that provider. The CRM verifies ID tokens and owns only its app session, tenant memberships, relationship data, and audit trail. The CRM does not bind to the PaniPay D1 database or read PaniPay identity tables.
 
-- PaniPay `pp_session` authentication and user model.
-- PaniPay D1 binding `DB`, including shared `users` and `platform_staff` tables.
-- PaniPay CSRF and trusted-origin configuration.
-- PaniPay Cloudflare/Next runtime and API helpers.
+## Local setup
 
-This source snapshot is not independently deployable yet. Before serving `crm.panigale.tech`, define the identity/SSO boundary, tenant authorization, database ownership and migrations, runtime bindings, secrets, backups, and restore procedure. Do not expose CRM endpoints or point a new deployment at production data before those controls are ready.
+1. Install Node 22.13 or newer and dependencies with `npm ci`.
+2. Create a local D1 database and apply the CRM migrations with `npm run db:apply:local`.
+3. Create `.dev.vars` (ignored by Git) with `CRM_PUBLIC_URL=http://localhost:5173`, `AUTH_ISSUER=https://auth.panigale.tech`, `PANIGALE_AUTH_CLIENT_ID=<registered-client-id>`, and `CRM_BOOTSTRAP_OWNER_EMAIL=<verified-admin-email>`.
+4. Register `http://localhost:5173/api/auth/callback` in Panigale Auth and run `npm run dev`.
+
+The first successful login by the configured bootstrap owner claims the one-time CRM bootstrap and seeds the Panigale Group tenant, units, and default pipeline stages. Remove the bootstrap secret after it has been claimed. Other accounts must sign in once, then receive explicit unit access from a CRM superadmin.
+
+## Production provisioning and release
+
+The checked-in `wrangler.production.jsonc` intentionally has an all-zero D1 database ID. Before deployment, provision the dedicated D1 database and R2 document bucket, put the actual D1 ID in the Worker config, configure the Panigale Auth client with `https://crm.panigale.tech/api/auth/callback`, and set `PANIGALE_AUTH_CLIENT_ID` and the temporary `CRM_BOOTSTRAP_OWNER_EMAIL` with Cloudflare Worker secrets. Never put secret values in Wrangler vars, source, or Git. The CRM does not bind to PaniPay `DB` or read its user tables.
+
+Back up D1 before every production migration. Use Cloudflare D1 point-in-time recovery or an encrypted D1 export stored outside the Worker deployment, and retain a separate R2 backup of `panigale-group-crm-documents-production`. Restore rehearsal and identity, authorization, CRUD, document, mobile, health, and unit-isolation checks must pass in a non-production environment before exposing the custom domain. Keep `https://panipay.panigale.tech/crm` available until a deliberate cutover has passed the full checklist. No DNS change, old CRM removal, or data migration is part of local setup.
+
+### Required release checks
+
+- Panigale Auth login, callback, logout, session expiry, and denied/unverified identity behavior.
+- Unit grants, cross-unit/tenant denial, financial-field restrictions, and append-only access audit events.
+- Contacts, companies, opportunities, projects, tasks, proposals/version history, invoices/payments, document upload/download, and archive behavior.
+- Responsive desktop/mobile UI and `/api/health` against the deployed Worker.
+- Confirm D1 and R2 backups can be restored before changing DNS.
 
 ## Data access model
 
@@ -36,8 +52,8 @@ CRM data is tenant-scoped and business-unit scoped. Cross-unit access requires e
 ## Contents
 
 - `app/crm/page.tsx` — CRM interface.
-- `app/api/crm/` — current API route handlers, still coupled to PaniPay authentication/runtime.
+- `app/api/crm/` — tenant and unit scoped CRM API handlers.
 - `lib/server/crm.mjs` — CRM tenant, access, and resource logic.
-- `drizzle/0044_panigale_crm.sql` — initial CRM schema, already applied to PaniPay production D1 during the first implementation.
+- `crm-migrations/` — standalone CRM database migrations. `drizzle/0044_panigale_crm.sql` is retained as historical PaniPay deployment context and is not used by the standalone app.
 
 See [HANDOFF.md](HANDOFF.md) for the continuation prompt and migration checklist.

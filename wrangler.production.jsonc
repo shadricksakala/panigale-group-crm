@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "panigale-group-crm",
+  "main": "./worker-entry.mjs",
+  "compatibility_date": "2026-11-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./dist/client" },
+  "routes": [
+    { "pattern": "crm.panigale.tech", "custom_domain": true, "zone_name": "panigale.tech", "enabled": true, "previews_enabled": false }
+  ],
+  "d1_databases": [
+    {
+      "binding": "CRM_DB",
+      "database_name": "panigale-group-crm-production",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "crm-migrations"
+    }
+  ],
+  "r2_buckets": [
+    { "binding": "CRM_DOCUMENTS", "bucket_name": "panigale-group-crm-documents-production" }
+  ],
+  "vars": {
+    "CRM_PUBLIC_URL": "https://crm.panigale.tech",
+    "AUTH_ISSUER": "https://auth.panigale.tech"
+  },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "panigale-group-crm",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "vinext dev --port 5173",
+    "build": "vinext build",
+    "start": "wrangler dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
+    "typecheck": "tsc --noEmit --incremental false",
+    "deploy": "npm run build && wrangler deploy --config wrangler.production.jsonc",
+    "db:apply:local": "wrangler d1 migrations apply panigale-group-crm-production --local --config wrangler.production.jsonc",
+    "db:apply:remote": "wrangler d1 migrations apply panigale-group-crm-production --remote --config wrangler.production.jsonc"
+  },
+  "dependencies": {
+    "lucide-react": "^1.31.0",
+    "next": "16.3.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "^3.8.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.37.1",
+    "@cloudflare/workers-types": "4.20260515.1",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-rsc": "0.5.26",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3",
+    "vinext": "1.0.0-beta.5",
+    "vite": "8.0.13",
+    "wrangler": "4.92.0"
+  },
+  "type": "module"
+}
