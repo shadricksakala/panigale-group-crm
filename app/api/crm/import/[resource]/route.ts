@@ -18,7 +18,7 @@ function parseCsv(source:string) {
   return rows.filter(values=>values.some(value=>value.length));
 }
 const fields:Record<string,string[]>= {
-  contacts:["name","company_id","job_title","email","phone","source","status","owner_user_id","next_follow_up","notes"],
+  contacts:["name","company_id","job_title","email","phone","source","status","owner_user_id","next_follow_up","notes","tags"],
   leads:["title","company_id","contact_id","stage","source","qualification","value","value_minor","currency","expected_close","next_step","owner_user_id","loss_reason","notes"],
 };
 export async function POST(request:Request,{params}:RouteContext) {

@@ -139,6 +139,13 @@ a { color: inherit; }
 .crm-pill.gold { color: #a76c00; background: #fff1cd; }
 .crm-pill.red { color: #b93543; background: #ffebee; }
 .crm-pill.violet { color: #644bc3; background: #efeaff; }
+.crm-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.crm-tag { display: inline-flex; min-height: 23px; align-items: center; border-radius: 99px; padding: 0 10px; font-size: 10px; font-weight: 650; }
+.crm-tag.tone-green { color: #087b59; background: #e0f7ed; }
+.crm-tag.tone-blue { color: #075ad5; background: #e5efff; }
+.crm-tag.tone-gold { color: #a76c00; background: #fff1cd; }
+.crm-tag.tone-violet { color: #644bc3; background: #efeaff; }
+.crm-tag-empty { color: var(--muted); font-size: 11px; }
 .crm-stage-body { display: grid; gap: 17px; padding: 20px 22px 22px; }
 .crm-stage-list { display: grid; gap: 7px; max-height: 260px; overflow: auto; }
 .crm-stage-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 11px; padding: 9px 10px; background: #fff; }
