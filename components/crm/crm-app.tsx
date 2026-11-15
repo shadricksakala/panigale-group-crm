@@ -723,13 +723,16 @@ function ReportsView({ data, stageRows, canSeeFinancials, financialUnitIds }: { 
     for(const row of data.activities)records.push(["Task / activity",row,String(row.title||""),String(row.status||"")]);
     for(const row of data.proposals)records.push(["Proposal",row,String(row.title||""),String(row.status||"")]);
     for(const row of data.invoices)records.push(["Invoice",row,String(row.title||""),String(row.status||"")]);
-    const rows=[ ["Record type","Name","Organization","Status","Owner","Business unit","Created","Due / close date","Amount (minor units)"] ];
+    const rows=[ ["Record type","Name","Organization","Status","Owner","Business unit","Created","Due / close date","Amount","Currency"] ];
     for(const [type,row,name,status] of records){
-      const canExportValue=financialUnitIds.includes(String(row.unit_id||""));
-      const amount=canExportValue?(row.value_minor??row.amount_minor??""):"Restricted";
+      const rawAmount=row.value_minor??row.amount_minor;
+      const numericAmount=rawAmount==null||rawAmount===""?Number.NaN:Number(rawAmount);
+      const canExportValue=financialUnitIds.includes(String(row.unit_id||""))&&Number.isFinite(numericAmount);
+      const amount=canExportValue?(numericAmount/100).toFixed(2):"";
+      const currency=canExportValue?String(row.currency||"ZMW"):"";
       const company=String(row.company_name||"");
       const due=String(row.due_at||row.due_date||row.expected_close||row.valid_until||"").slice(0,10);
-      rows.push([type,name,company,status,String(row.owner_name||""),String(row.unit_name||""),String(row.created_at||"").slice(0,10),due,String(amount)]);
+      rows.push([type,name,company,status,String(row.owner_name||""),String(row.unit_name||""),String(row.created_at||"").slice(0,10),due,amount,currency]);
     }
     downloadCsv("panigale-crm-records.csv",rows);
   };
