@@ -154,6 +154,12 @@ a { color: inherit; }
 .crm-aging-meter { height: 7px; overflow: hidden; border-radius: 99px; background: #edf1f7; }
 .crm-aging-meter span { display: block; height: 100%; min-width: 0; border-radius: inherit; transition: width .2s ease; }
 .crm-aging-row small { color: var(--muted); font-size: 10px; }
+.crm-risk-row { border-top: 1px solid #f3e6c6; padding: 11px 0; }
+.crm-risk-title { display: flex; align-items: flex-start; gap: 9px; }
+.crm-risk-title .crm-list-content { min-width: 0; }
+.crm-risk-title .crm-list-content strong { white-space: normal; }
+.crm-risk-title .crm-list-content small { display: block; margin-top: 5px; color: #7d6a43; font-size: 10px; line-height: 1.45; }
+.crm-risk-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 9px; }
 .crm-contact-layout { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 14px; }
 .crm-contact-panel { position: sticky; top: 94px; align-self: start; overflow: hidden; }
 .crm-contact-hero { padding: 20px; }
@@ -292,6 +298,7 @@ a { color: inherit; }
   .crm-stage-form { grid-template-columns: 1fr; padding: 13px; }
   .crm-stage-form h3, .crm-stage-form .crm-form-actions { grid-column: auto; }
   .crm-aging-list { grid-template-columns: 1fr; gap: 14px; }
+  .crm-risk-actions .crm-filter { min-width: 0; flex: 1; }
   .crm-overlay { align-items: end; padding: 8px; }
   .crm-modal { max-height: 93dvh; }
   .crm-modal-head { padding: 16px 17px; }
