@@ -12,6 +12,7 @@ import {
   Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { ApiError, getJson, secureForm, secureJson } from "../../lib/client/api";
+import { CrmAssistant, ReminderEmailSettings } from "./crm-assistant";
 
 type Row = Record<string, string | number | boolean | null | undefined> & { id: string };
 type Module = "overview" | "contacts" | "pipeline" | "projects" | "tasks" | "proposals" | "documents" | "invoices" | "reports" | "access";
@@ -429,7 +430,13 @@ export function CrmApp() {
     finally { setBusy(false); }
   }
   async function signOut() {
-    try { await secureJson("/api/auth/logout", "POST"); } finally { window.location.assign("/crm"); }
+    setError("");
+    try {
+      await secureJson("/api/auth/logout", "POST");
+      window.location.assign("/crm");
+    } catch (reason) {
+      setError(reason instanceof Error ? `Unable to sign out: ${reason.message}` : "Unable to sign out. Please try again.");
+    }
   }
   function setActiveModule(next: Module) {
     setModule(next); setSearch(""); setDetail(null); setDetailType(null); setMoreOpen(false);
@@ -505,8 +512,9 @@ export function CrmApp() {
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
         <button className="crm-icon-button crm-mobile-search-trigger" title="Search CRM" aria-label="Search CRM" aria-haspopup="dialog" aria-expanded={mobileSearchOpen} onClick={()=>setMobileSearchOpen(true)}><Search size={18}/></button>
+        <CrmAssistant tenantId={context.tenant.id} unitId={selectedUnit || (context.units.length === 1 ? context.units[0].id : "")} unitName={currentUnit?.name || "Panigale Group"}/>
         <button className="crm-icon-button crm-theme-toggle" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`} onClick={toggleTheme}>{theme === "light" ? <Moon size={18}/> : <Sun size={18}/>}</button>
-        <div className="crm-reminder-wrap"><button className="crm-icon-button crm-reminder-button" title="Task reminders" aria-label={`Task reminders${dueTasks?`, ${dueTasks} due`:""}`} aria-haspopup="dialog" aria-expanded={remindersOpen} onClick={()=>setRemindersOpen(value=>!value)}><Bell size={18}/>{dueTasks>0&&<span className="crm-reminder-count">{dueTasks>99?"99+":dueTasks}</span>}</button>{remindersOpen&&<section className="crm-reminder-panel" role="dialog" aria-label="Task reminders"><div className="crm-card-head"><div><h2>Task reminders</h2><p>{taskReminders.length?`${dueTasks} overdue or due in 7 days${dueTasks>taskReminders.length?" · showing 20":""}`:"All caught up"}</p></div><button className="crm-icon-button" aria-label="Close reminders" onClick={()=>setRemindersOpen(false)}><X size={15}/></button></div>{taskReminders.length?taskReminders.map(task=>{const date=String(task.due_at).slice(0,10),today=new Date().toISOString().slice(0,10),overdue=date<today;return <button className="crm-reminder-item" key={task.id} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}><span className={`crm-metric-icon ${overdue?"tone-red":"tone-gold"}`}><Clock3 size={15}/></span><span className="crm-list-content"><strong>{task.title}</strong><span>{task.company_name||task.contact_name||task.project_name||titleCase(task.kind)} · {task.owner_name||"Unassigned"}</span></span><span className={`crm-pill ${overdue?"red":"gold"}`}>{overdue?"Overdue":date===today?"Today":fmtDate(date)}</span></button>;}):<p className="crm-reminder-empty">No open tasks are due this week.</p>}<button className="crm-panel-link" style={{width:"100%",justifyContent:"center",marginTop:8}} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}>View all tasks <ArrowRight size={14}/></button></section>}</div>
+        <div className="crm-reminder-wrap"><button className="crm-icon-button crm-reminder-button" title="Task reminders" aria-label={`Task reminders${dueTasks?`, ${dueTasks} due`:""}`} aria-haspopup="dialog" aria-expanded={remindersOpen} onClick={()=>setRemindersOpen(value=>!value)}><Bell size={18}/>{dueTasks>0&&<span className="crm-reminder-count">{dueTasks>99?"99+":dueTasks}</span>}</button>{remindersOpen&&<section className="crm-reminder-panel" role="dialog" aria-label="Task reminders"><div className="crm-card-head"><div><h2>Task reminders</h2><p>{taskReminders.length?`${dueTasks} overdue or due in 7 days${dueTasks>taskReminders.length?" · showing 20":""}`:"All caught up"}</p></div><button className="crm-icon-button" aria-label="Close reminders" onClick={()=>setRemindersOpen(false)}><X size={15}/></button></div>{taskReminders.length?taskReminders.map(task=>{const date=String(task.due_at).slice(0,10),today=new Date().toISOString().slice(0,10),overdue=date<today;return <button className="crm-reminder-item" key={task.id} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}><span className={`crm-metric-icon ${overdue?"tone-red":"tone-gold"}`}><Clock3 size={15}/></span><span className="crm-list-content"><strong>{task.title}</strong><span>{task.company_name||task.contact_name||task.project_name||titleCase(task.kind)} · {task.owner_name||"Unassigned"}</span></span><span className={`crm-pill ${overdue?"red":"gold"}`}>{overdue?"Overdue":date===today?"Today":fmtDate(date)}</span></button>;}):<p className="crm-reminder-empty">No open tasks are due this week.</p>}<ReminderEmailSettings tenantId={context.tenant.id}/><button className="crm-panel-link" style={{width:"100%",justifyContent:"center",marginTop:8}} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}>View all tasks <ArrowRight size={14}/></button></section>}</div>
         <div className="crm-account"><span className="crm-avatar">{initials(context.user.name)}</span><span className="crm-account-copy"><strong style={{ fontSize: 12 }}>{context.user.name}</strong><small style={{ color: "var(--muted)", fontSize: 10 }}>{currentUnit?.name || "Panigale Group"}</small></span><ChevronDown size={14}/></div>
       </header>
 
