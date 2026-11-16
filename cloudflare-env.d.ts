@@ -11,6 +11,8 @@ interface CloudflareEnv {
   GOOGLE_OAUTH_CLIENT_SECRET?: string;
   CRM_INTEGRATION_ENCRYPTION_KEY?: string;
   CRM_EMAIL_SEND_ENABLED?: string;
+  CRM_READ_ONLY_MODE?: string;
+  CRM_SCHEDULED_JOBS_ENABLED?: string;
   CRM_MAILER?: Fetcher;
   AI?: Ai;
 }

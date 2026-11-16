@@ -3,6 +3,7 @@ import { receivePaniPayWebhook } from "../../../../lib/server/panipay-invoices.m
 
 export async function POST(request: Request) {
   try {
+    if (env.CRM_READ_ONLY_MODE === "true") return Response.json({ error: "The CRM is temporarily read-only for maintenance." }, { status: 503, headers: { "cache-control": "no-store", "retry-after": "300" } });
     const result = await receivePaniPayWebhook(env.CRM_DB, env, request);
     return Response.json(result, { status: 200, headers: { "cache-control": "no-store" } });
   } catch (reason) {

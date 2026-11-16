@@ -1,12 +1,12 @@
 # Panigale Group CRM
 
-Dedicated source repository and workspace for the Panigale Group relationship CRM. The planned production address is **https://crm.panigale.tech**.
+Dedicated source repository and workspace for the Panigale Group relationship CRM. Production is **https://crm.panigale.tech**.
 
 The CRM provides tenant and business-unit scoped contacts, leads, activities, projects, proposals, invoice tracking, memberships, and audit events. This repository is the canonical home for CRM implementation. Other Panigale project repositories remain accessible as integration references; do not copy unrelated products into this repository.
 
 ## Current state
 
-This repository contains the extracted first CRM implementation. The existing deployment is still hosted at `https://panipay.panigale.tech/crm` until the independent app is ready. Keep that deployment intact during development and cut over to `crm.panigale.tech` only after the standalone identity, data, runtime, and production checks are complete.
+The standalone CRM is deployed at `https://crm.panigale.tech` on its own Cloudflare Worker, D1 database, and R2 document bucket. Sign-in uses Panigale Auth OIDC, and the owner confirmed a successful login. The existing PaniPay-hosted CRM at `https://panipay.panigale.tech/crm` remains the rollback path until the remaining integration, data recovery, mobile, and full isolation checks have passed and the cutover is deliberately closed out.
 
 ## Source workspace access
 
@@ -43,9 +43,9 @@ The first successful login by the configured bootstrap owner claims the one-time
 
 ## Production provisioning and release
 
-The checked-in `wrangler.production.jsonc` intentionally has an all-zero D1 database ID. Before deployment, provision the dedicated D1 database and R2 document bucket, put the actual D1 ID in the Worker config, and set the temporary `CRM_BOOTSTRAP_OWNER_EMAIL` as a Cloudflare Worker secret. The OIDC client ID is public and belongs in Wrangler vars; never put secret values in Wrangler vars, source, or Git. The CRM does not bind to PaniPay `DB` or read its user tables.
+The checked-in `wrangler.production.jsonc` points to the provisioned standalone D1 database `panigale-group-crm-production` and R2 bucket `panigale-group-crm-documents-production`. The active Worker uses a non-secret OIDC client ID; bootstrap ownership and the Google token-encryption key are Cloudflare secrets. The CRM does not bind to PaniPay `DB` or read its user tables. Production AI and email delivery are disabled. Google OAuth credentials and the company mailer service binding are not configured.
 
-Back up D1 before every production migration. Use Cloudflare D1 point-in-time recovery or an encrypted D1 export stored outside the Worker deployment, and retain a separate R2 backup of `panigale-group-crm-documents-production`. Restore rehearsal and identity, authorization, CRUD, document, mobile, health, and unit-isolation checks must pass in a non-production environment before exposing the custom domain. Keep `https://panipay.panigale.tech/crm` available until a deliberate cutover has passed the full checklist. No DNS change, old CRM removal, or data migration is part of local setup.
+Before a production migration, record a fresh D1 Time Travel bookmark and follow [the production recovery runbook](docs/production-operations.md). Native point-in-time recovery has been verified for the production database; encrypted long-term D1 exports and a separate R2 document backup have not yet been configured or restore-rehearsed. Restore rehearsal and identity, authorization, CRUD, document, mobile, health, and unit-isolation checks must pass before removing the rollback path. Do not treat production CRM data as disposable.
 
 ### Required release checks
 
@@ -66,5 +66,6 @@ CRM data is tenant-scoped and business-unit scoped. Cross-unit access requires e
 - `app/api/crm/` — tenant and unit scoped CRM API handlers.
 - `lib/server/crm.mjs` — CRM tenant, access, and resource logic.
 - `crm-migrations/` — standalone CRM database migrations. `drizzle/0044_panigale_crm.sql` is retained as historical PaniPay deployment context and is not used by the standalone app.
+- `docs/production-operations.md` — D1 point-in-time recovery, maintenance mode, migration, and remaining backup requirements.
 
 See [HANDOFF.md](HANDOFF.md) for the continuation prompt and migration checklist.

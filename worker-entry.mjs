@@ -21,6 +21,7 @@ export default {
     });
   },
   async scheduled(controller, env, ctx) {
+    if (env.CRM_SCHEDULED_JOBS_ENABLED !== "true") return;
     ctx.waitUntil(queueCrmReminderEmails(env.CRM_DB, controller.scheduledTime).then(result => {
       console.info("crm_reminder_scan_completed", result);
     }).catch(error => {
