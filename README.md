@@ -50,6 +50,7 @@ Back up D1 before every production migration. Use Cloudflare D1 point-in-time re
 ### Required release checks
 
 - Panigale Auth login, callback, logout, session expiry, and denied/unverified identity behavior.
+- For a failed callback, use the `reference` returned by the CRM and find its `crm_auth_callback_rejected` or `crm_auth_callback_unexpected_error` Worker log entry. The log records only the callback stage/status or error class; never log callback URLs, OAuth codes, verifiers, tokens, or ID-token claims.
 - Unit grants, cross-unit/tenant denial, financial-field restrictions, and append-only access audit events.
 - Contacts, companies, opportunities, projects, tasks, proposals/version history, invoices/payments, document upload/download, and archive behavior.
 - Responsive desktop/mobile UI and `/api/health` against the deployed Worker.
