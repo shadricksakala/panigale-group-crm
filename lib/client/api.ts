@@ -37,7 +37,7 @@ export async function csrfToken() {
   return String(data.token || "");
 }
 
-export async function secureJson<T = Record<string, unknown>>(path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown): Promise<T> {
+export async function secureJson<T = Record<string, unknown>>(path: string, method: "POST" | "PATCH" | "PUT" | "DELETE", body?: unknown): Promise<T> {
   const token = await csrfToken();
   const response = await fetch(path, {
     method,

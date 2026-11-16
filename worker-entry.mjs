@@ -1,4 +1,5 @@
 import application from "./dist/server/index.js";
+import { queueCrmReminderEmails } from "./lib/server/crm-reminders.mjs";
 
 export default {
   async fetch(request, env, ctx) {
@@ -16,5 +17,12 @@ export default {
       statusText: response.statusText,
       headers,
     });
+  },
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(queueCrmReminderEmails(env.CRM_DB, controller.scheduledTime).then(result => {
+      console.info("crm_reminder_scan_completed", result);
+    }).catch(error => {
+      console.error("crm_reminder_scan_failed", { name: error instanceof Error ? error.name : "unknown" });
+    }));
   },
 };

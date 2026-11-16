@@ -5,6 +5,8 @@
   "compatibility_date": "2026-11-15",
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "./dist/client" },
+  "ai": { "binding": "AI" },
+  "triggers": { "crons": ["*/15 * * * *"] },
   "routes": [
     { "pattern": "crm.panigale.tech", "custom_domain": true, "zone_name": "panigale.tech", "enabled": true, "previews_enabled": false }
   ],
@@ -22,7 +24,9 @@
   "vars": {
     "CRM_PUBLIC_URL": "https://crm.panigale.tech",
     "AUTH_ISSUER": "https://auth.panigale.tech",
-    "PANIGALE_AUTH_CLIENT_ID": "pg_ad413e72881fcd82d923e8e9bdd4f6af"
+    "PANIGALE_AUTH_CLIENT_ID": "pg_ad413e72881fcd82d923e8e9bdd4f6af",
+    "CRM_AI_ENABLED": "false",
+    "CRM_AI_MODEL": "@cf/moonshotai/kimi-k2.7-code"
   },
   "observability": { "enabled": true, "head_sampling_rate": 1 }
 }

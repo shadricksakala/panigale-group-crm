@@ -5,6 +5,9 @@ interface CloudflareEnv {
   AUTH_ISSUER?: string;
   PANIGALE_AUTH_CLIENT_ID?: string;
   CRM_BOOTSTRAP_OWNER_EMAIL?: string;
+  CRM_AI_ENABLED?: string;
+  CRM_AI_MODEL?: string;
+  AI?: Ai;
 }
 
 declare namespace Cloudflare {
