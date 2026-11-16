@@ -5,9 +5,10 @@ The CRM keeps its invoice record and sends a matching PaniPay invoice for hosted
 ## Configure a merchant
 
 1. Set the Cloudflare secret `CRM_INTEGRATION_ENCRYPTION_KEY` to a 32-byte hex key. This is also used by the CRM's Google integration. Never put it in Wrangler vars or source.
-2. In PaniPay Developers, create a server API key for the merchant with `invoices:read`, `invoices:write`, and `payments:read` scopes.
-3. In that same merchant account, create a webhook endpoint for `payment.succeeded`, using the CRM webhook URL shown under CRM → Invoices. Paste the PaniPay API key and the endpoint's complete `whsec_` signing secret into that unit's PaniPay connection card. Credentials are encrypted at rest and are not returned to the browser after saving.
-4. Repeat for each business unit's merchant. CRM superadmins manage these connections; users who can see financial records in a unit can send invoices and refresh payment status.
+2. CRM maps each confirmed business unit to its PaniPay merchant profile. The connection check calls `GET /api/v1/profile` and rejects a key that belongs to a different PaniPay organization.
+3. In the mapped PaniPay profile's Developers page, create a server API key with `invoices:read`, `invoices:write`, and `payments:read` scopes.
+4. In that same merchant profile, create a webhook endpoint for `payment.succeeded`, using the CRM webhook URL shown under CRM → Invoices. Paste the PaniPay API key and the endpoint's complete `whsec_` signing secret into that unit's PaniPay connection card. Credentials are encrypted at rest and are not returned to the browser after saving.
+5. Repeat for each mapped business unit's merchant. CRM superadmins manage these connections; users who can see financial records in a unit can send invoices and refresh payment status. Units without a confirmed profile mapping cannot be connected.
 
 ## Send and reconcile
 

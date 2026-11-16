@@ -5,7 +5,7 @@ import { Check, LoaderCircle, ShieldCheck } from "lucide-react";
 import { getJson, secureJson } from "../../lib/client/api";
 
 type Unit = { id: string; name: string };
-type Connection = { unitId: string; connected: boolean; webhookUrl: string };
+type Connection = { unitId: string; connected: boolean; profileId: string; profileName: string; webhookUrl: string };
 
 export function PaniPayConnections({ tenantId, units }: { tenantId: string; units: Unit[] }) {
   const [items, setItems] = useState<Connection[]>([]);
@@ -40,10 +40,11 @@ export function PaniPayConnections({ tenantId, units }: { tenantId: string; unit
       const value = secrets[item.unitId] || { apiKey: "", webhookSecret: "" };
       return <form key={item.unitId} onSubmit={event => void save(event, item.unitId)} style={{ borderTop: "1px solid var(--line)", paddingTop: 12, marginTop: 12, display: "grid", gap: 9 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}><strong style={{ fontSize: 12 }}>{units.find(unit => unit.id === item.unitId)?.name || "Business unit"}</strong><span className={`crm-pill ${item.connected ? "green" : "gold"}`}>{item.connected ? "Connected" : "Not connected"}</span></div>
-        <label className="crm-field">PaniPay API key<input type="password" autoComplete="new-password" value={value.apiKey} onChange={event => setSecrets(current => ({ ...current, [item.unitId]: { ...value, apiKey: event.target.value } }))} placeholder={item.connected ? "Enter a replacement key to rotate" : "pp_live_…"}/></label>
-        <label className="crm-field">Webhook signing secret<input type="password" autoComplete="new-password" value={value.webhookSecret} onChange={event => setSecrets(current => ({ ...current, [item.unitId]: { ...value, webhookSecret: event.target.value } }))} placeholder={item.connected ? "Enter to replace the current secret" : "whsec_…"}/></label>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 11 }}>Mapped PaniPay profile: <strong>{item.profileName || "Not assigned"}</strong>{!item.profileId && " · Invoice connection is disabled until a profile is mapped."}</p>
+        <label className="crm-field">PaniPay API key<input disabled={!item.profileId} type="password" autoComplete="new-password" value={value.apiKey} onChange={event => setSecrets(current => ({ ...current, [item.unitId]: { ...value, apiKey: event.target.value } }))} placeholder={item.connected ? "Enter a replacement key to rotate" : "pp_live_…"}/></label>
+        <label className="crm-field">Webhook signing secret<input disabled={!item.profileId} type="password" autoComplete="new-password" value={value.webhookSecret} onChange={event => setSecrets(current => ({ ...current, [item.unitId]: { ...value, webhookSecret: event.target.value } }))} placeholder={item.connected ? "Enter to replace the current secret" : "whsec_…"}/></label>
         <label className="crm-field">Webhook URL<input readOnly value={item.webhookUrl}/></label>
-        <button className="crm-secondary crm-button-small" disabled={busy === item.unitId}>{busy === item.unitId ? <LoaderCircle size={14} className="animate-spin"/> : <Check size={14}/>}Connect {item.connected ? "or rotate" : "merchant"}</button>
+        <button className="crm-secondary crm-button-small" disabled={busy === item.unitId || !item.profileId}>{busy === item.unitId ? <LoaderCircle size={14} className="animate-spin"/> : <Check size={14}/>}Connect {item.connected ? "or rotate" : "merchant"}</button>
       </form>;
     })}
     {error && <p className="crm-alert" role="alert">{error}</p>}{notice && <p className="crm-notice" role="status">{notice}</p>}
