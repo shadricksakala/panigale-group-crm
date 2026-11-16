@@ -372,13 +372,14 @@ a { color: inherit; }
 .crm-email-empty { display: grid; min-height: 100px; align-content: center; padding: 18px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
 .crm-email-compose { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 15px; padding: 14px; background: var(--surface); }
 .crm-email-compose textarea { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 10px; color: var(--ink); background: var(--surface); font: inherit; font-size: 12px; }
+.crm-email-sender-note { margin: 0; border-radius: 10px; padding: 10px 12px; color: var(--muted); background: var(--canvas); font-size: 11px; line-height: 1.5; }
 .crm-email-approvals { display: grid; gap: 10px; }
 .crm-approval-list { display: grid; gap: 9px; }
 .crm-approval-item { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 11px; padding: 11px; }
 .crm-approval-item > div:first-child { display: grid; min-width: 0; gap: 4px; }
 .crm-approval-item strong { overflow-wrap: anywhere; font-size: 12px; }
 .crm-approval-item span { color: var(--muted); font-size: 10px; }
-.crm-approval-item p { display: -webkit-box; overflow: hidden; margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.crm-approval-item p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .crm-approval-actions { display: flex; flex: none; align-items: center; gap: 6px; }
 @media (max-width: 740px) { .crm-email-toolbar { flex-wrap: wrap; } .crm-email-toolbar label { flex-basis: 100%; } .crm-email-grid { grid-template-columns: 1fr; } .crm-email-list { max-height: 300px; } .crm-approval-item { flex-direction: column; } .crm-approval-actions { justify-content: flex-end; } }
 
