@@ -21,7 +21,9 @@ export async function GET(request:Request){
       (SELECT j.last_error_code FROM crm_email_sync_jobs j WHERE j.connection_id=c.id ORDER BY j.created_at DESC LIMIT 1) AS last_sync_error
       FROM crm_google_connections c WHERE c.tenant_id=? AND c.unit_id IN (${units.map(()=>"?").join(",")}) AND (c.connection_scope='shared' OR c.owner_user_id=?) ORDER BY c.unit_id,c.connection_scope,c.email`).bind(context.tenantId,...units,user.id).all():{results:[]};
     const items=await Promise.all((rows.results||[]).map(async(row:any)=>{const canManageRetention=await manager(context.tenantId,String(row.unit_id),user.id);return {...row,canManageRetention,canDisconnect:row.connection_scope==="personal"?row.owner_user_id===user.id:canManageRetention};}));
-    return json({items,googleConfigured:Boolean(env.GOOGLE_OAUTH_CLIENT_ID&&env.GOOGLE_OAUTH_CLIENT_SECRET&&env.CRM_INTEGRATION_ENCRYPTION_KEY)});
+    const googleConfiguration=[ ["GOOGLE_OAUTH_CLIENT_ID",env.GOOGLE_OAUTH_CLIENT_ID], ["GOOGLE_OAUTH_CLIENT_SECRET",env.GOOGLE_OAUTH_CLIENT_SECRET], ["CRM_INTEGRATION_ENCRYPTION_KEY",env.CRM_INTEGRATION_ENCRYPTION_KEY] ] as Array<[string,unknown]>;
+    const googleConfigurationMissing=googleConfiguration.filter(([,value])=>!value).map(([key])=>key);
+    return json({items,googleConfigured:googleConfigurationMissing.length===0,googleConfigurationMissing});
   }catch(error){if(error instanceof Response)return error;console.error("crm_google_connections_read_failed",{name:error instanceof Error?error.name:"unknown"});return json({error:"Unable to load Google connections."},500);}
 }
 

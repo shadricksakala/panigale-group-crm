@@ -240,6 +240,19 @@ export function CrmApp() {
   }, []);
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    const connected = url.searchParams.get("integration_connected");
+    const integrationError = url.searchParams.get("integration_error");
+    if (connected !== "google" && integrationError !== "google_denied") return;
+    if (connected === "google") setNotice("Google account connected. Open Connect Google account to view its sync status.");
+    else setError("Google authorization was cancelled. Your CRM account is still connected.");
+    setRemindersOpen(true);
+    url.searchParams.delete("integration_connected");
+    url.searchParams.delete("integration_error");
+    window.history.replaceState(window.history.state, "", url.toString());
+  }, []);
+
+  useEffect(() => {
     if (!themeReady) return;
     try { window.localStorage.setItem("panigale-crm-theme", theme); } catch { /* The theme still applies for this session. */ }
   }, [theme, themeReady]);
