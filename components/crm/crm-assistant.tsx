@@ -90,15 +90,15 @@ export function ReminderEmailSettings({ tenantId }: { tenantId:string }) {
       .catch(reason => { if(!cancelled)setError(reason instanceof Error?reason.message:"Unable to load email reminder settings."); });
     return () => { cancelled=true; };
   },[tenantId]);
-  async function toggle() {
+  async function save(nextEnabled:boolean) {
     setBusy(true);setError("");
     try {
-      const result=await secureJson<{emailRemindersEnabled:boolean;timezone:string;emailDeliveryReady:boolean}>("/api/settings/reminders","PUT",{tenantId,emailRemindersEnabled:!enabled,timezone});
+      const result=await secureJson<{emailRemindersEnabled:boolean;timezone:string;emailDeliveryReady:boolean}>("/api/settings/reminders","PUT",{tenantId,emailRemindersEnabled:nextEnabled,timezone});
       setEnabled(result.emailRemindersEnabled);setTimezone(result.timezone);setReady(result.emailDeliveryReady);
     } catch(reason){setError(reason instanceof Error?reason.message:"Unable to save email reminder settings.");}
     finally{setBusy(false);}
   }
-  return <div className="crm-reminder-email-setting"><label><input type="checkbox" checked={enabled} disabled={busy} onChange={() => void toggle()}/><span><strong>Email task reminders</strong><small>24 hours before and on the due date</small></span></label><p>{ready?`Reminders use ${timezone}.`:"Your preference is saved. Email delivery will start when the company mail server is connected."}</p>{error&&<small role="alert">{error}</small>}</div>;
+  return <div className="crm-reminder-email-setting"><label><input type="checkbox" checked={enabled} disabled={busy} onChange={() => void save(!enabled)}/><span><strong>Email task reminders</strong><small>24 hours before and on the due date</small></span></label><label className="crm-reminder-timezone">Reminder time zone<input type="text" list="crm-reminder-timezones" value={timezone} disabled={busy} onChange={event=>setTimezone(event.target.value)} placeholder="Africa/Lusaka"/><datalist id="crm-reminder-timezones">{["Africa/Lusaka","Africa/Harare","Africa/Johannesburg","Africa/Cairo","Africa/Nairobi","Africa/Lagos","Europe/London","Europe/Paris","Asia/Dubai","Asia/Kolkata","Asia/Singapore","America/New_York","America/Chicago","America/Los_Angeles","UTC"].map(zone=><option key={zone} value={zone}/>)}</datalist></label><button type="button" className="crm-secondary crm-button-small" disabled={busy} onClick={()=>void save(enabled)}>{busy?"Saving…":"Save reminder preferences"}</button><p>{ready?`Reminders use ${timezone}.`:"Your preference is saved. Email delivery will start when the company mail server is connected."}</p>{error&&<small role="alert">{error}</small>}</div>;
 }
 
 type GoogleConnection = {id:string;unit_id:string;connection_scope:"personal"|"shared";owner_user_id:string|null;email:string;granted_scopes:string;status:string;retention_days:number;connected_at:string;scanned_count:number;last_sync_status:string|null;last_sync_error:string|null;canManageRetention:boolean;canDisconnect:boolean};

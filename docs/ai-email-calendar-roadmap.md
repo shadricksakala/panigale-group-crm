@@ -30,7 +30,7 @@ The CRM already follows these patterns in `app/api/ai/assistant/route.ts` and `l
 - Use CRM activities as the reminder source of truth: owner, due time, related record, priority, and completion state.
 - Surface due today, overdue, and upcoming items in the dashboard, mobile view, and reminder panel.
 - Allow users to set personal reminders; managers may assign unit work where their role permits.
-- Send optional internal reminders through a notification adapter (email first, later other channels), with per-user preferences, quiet hours, deduplication, retries, and an audit trail.
+- Send optional internal reminders through a notification adapter (email first, later other channels), with per-user opt-in, an editable IANA time zone, local morning delivery, deduplication, retries, and an audit trail.
 - AI may propose a reminder from a communication; the recipient and due date must be shown and confirmed before creation.
 
 ### 3. Personal Gmail connections
