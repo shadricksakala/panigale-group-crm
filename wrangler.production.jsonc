@@ -26,7 +26,7 @@
     "AUTH_ISSUER": "https://auth.panigale.tech",
     "PANIGALE_AUTH_CLIENT_ID": "pg_ad413e72881fcd82d923e8e9bdd4f6af",
     "CRM_AI_ENABLED": "false",
-    "CRM_AI_MODEL": "@cf/moonshotai/kimi-k2.7-code",
+    "CRM_AI_MODEL": "@cf/openai/gpt-oss-20b",
     "CRM_EMAIL_SEND_ENABLED": "false"
   },
   "observability": { "enabled": true, "head_sampling_rate": 1 }

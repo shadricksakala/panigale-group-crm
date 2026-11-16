@@ -4,10 +4,11 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, LoaderCircle, Mail, Send, Sparkles, X } from "lucide-react";
 import { ApiError, getJson, secureJson } from "../../lib/client/api";
 
-type Message = { id?: string; role: "user" | "assistant"; content: string };
+type Message = { id?: string; role: "user" | "assistant"; content: string; sources?: AssistantSource[] };
 type Suggestion = { id: string; kind: "task" | "note"; title: string; details?: string; dueAt?: string | null; linkType?: string | null; linkId?: string | null };
+type AssistantSource = { id: string; type: string; label: string; date: string | null };
 
-export function CrmAssistant({ tenantId, unitId, unitName }: { tenantId: string; unitId: string; unitName: string }) {
+export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { tenantId: string; unitId: string; unitName: string; onOpenSource: (source: AssistantSource) => void }) {
   const [open,setOpen] = useState(false);
   const [messages,setMessages] = useState<Message[]>([]);
   const [suggestions,setSuggestions] = useState<Suggestion[]>([]);
@@ -22,7 +23,7 @@ export function CrmAssistant({ tenantId, unitId, unitName }: { tenantId: string;
     if (!open || !unitId) return;
     let cancelled = false;
     setLoading(true); setError("");
-    getJson<{ conversation: { id: string } | null; messages: Message[]; suggestions: Suggestion[] }>(`/api/ai/assistant?tenantId=${encodeURIComponent(tenantId)}&unitId=${encodeURIComponent(unitId)}`)
+    getJson<{ conversation: { id: string } | null; messages: (Message & { sources?: AssistantSource[] })[]; suggestions: Suggestion[] }>(`/api/ai/assistant?tenantId=${encodeURIComponent(tenantId)}&unitId=${encodeURIComponent(unitId)}`)
       .then(result => { if (!cancelled) { setConversationId(result.conversation?.id || ""); setMessages(result.messages || []); setSuggestions(result.suggestions || []); } })
       .catch(reason => { if (!cancelled) setError(reason instanceof Error ? reason.message : "Unable to load the assistant."); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -37,9 +38,9 @@ export function CrmAssistant({ tenantId, unitId, unitName }: { tenantId: string;
     if (!message || busy || !unitId) return;
     setBusy(true); setError(""); setMessages(current => [...current,{role:"user",content:message}]); setDraft("");
     try {
-      const result = await secureJson<{ conversationId:string; answer:string; suggestions:Suggestion[] }>("/api/ai/assistant","POST",{tenantId,unitId,conversationId,message});
+      const result = await secureJson<{ conversationId:string; answer:string; sources:AssistantSource[]; suggestions:Suggestion[] }>("/api/ai/assistant","POST",{tenantId,unitId,conversationId,message});
       setConversationId(result.conversationId);
-      setMessages(current => [...current,{role:"assistant",content:result.answer}]);
+      setMessages(current => [...current,{role:"assistant",content:result.answer,sources:result.sources||[]}]);
       if(result.suggestions?.length) setSuggestions(current => [...current,...result.suggestions]);
     } catch(reason) {
       setError(reason instanceof ApiError ? reason.message : reason instanceof Error ? reason.message : "The assistant is unavailable.");
@@ -65,7 +66,7 @@ export function CrmAssistant({ tenantId, unitId, unitName }: { tenantId: string;
         <div className="crm-assistant-messages" aria-live="polite">
           {loading && <p className="crm-assistant-status">Loading your private assistant history…</p>}
           {!loading && !messages.length && <div className="crm-assistant-empty"><strong>Work through relationships faster.</strong><span>Ask for a brief, meeting preparation, or a follow-up idea. CRM changes stay suggestions until you confirm them.</span></div>}
-          {messages.map((message,index)=><div className={`crm-assistant-message ${message.role}`} key={message.id || `${index}-${message.role}`}><span>{message.role === "assistant" ? "Pani" : "You"}</span><p>{message.content}</p></div>)}
+          {messages.map((message,index)=><div className={`crm-assistant-message ${message.role}`} key={message.id || `${index}-${message.role}`}><span>{message.role === "assistant" ? "Pani" : "You"}</span><p>{message.content}</p>{message.sources?.length? <div className="crm-assistant-citations"><strong>Sources</strong>{message.sources.map((source,sourceIndex)=><button type="button" key={`${source.id}-${sourceIndex}`} onClick={()=>onOpenSource(source)}><span>[S{sourceIndex+1}] {source.type} · {source.label}</span>{source.date&&<small>{source.date.slice(0,10)}</small>}</button>)}</div>:null}</div>)}
           {suggestions.length > 0 && <div className="crm-assistant-suggestions"><strong>Suggested CRM updates</strong>{suggestions.map(item=><article key={item.id} className="crm-assistant-suggestion"><div><span>{item.kind === "task" ? "Task" : "Note"}{item.dueAt ? ` · ${item.dueAt.slice(0,10)}` : ""}</span><strong>{item.title}</strong>{item.details && <p>{item.details}</p>}</div><div className="crm-assistant-suggestion-actions"><button type="button" disabled={busy || !pendingIds.has(item.id)} onClick={() => void resolveSuggestion(item,"confirm")}><Check size={14}/>Add</button><button type="button" disabled={busy || !pendingIds.has(item.id)} onClick={() => void resolveSuggestion(item,"dismiss")}>Dismiss</button></div></article>)}</div>}
           {busy && <p className="crm-assistant-status"><LoaderCircle size={14} className="crm-assistant-spin"/>Thinking…</p>}
           {error && <p className="crm-assistant-error" role="alert">{error}</p>}

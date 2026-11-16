@@ -508,6 +508,12 @@ a { color: inherit; }
 .crm-assistant-message.user { align-self: flex-end; border-color: #cfe0ff; background: #eff5ff; }
 .crm-assistant-message > span { color: var(--muted); font-size: 10px; font-weight: 700; }
 .crm-assistant-message p { margin: 5px 0 0; font-size: 12px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.crm-assistant-citations { display: grid; gap: 4px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.crm-assistant-citations > strong { color: var(--muted); font-size: 10px; }
+.crm-assistant-citations button { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 8px; border: 0; border-radius: 7px; padding: 5px 6px; color: var(--blue); background: transparent; text-align: left; font-size: 10px; }
+.crm-assistant-citations button:hover { background: #edf4ff; }
+.crm-assistant-citations button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crm-assistant-citations button small { flex: none; color: var(--muted); font-size: 9px; }
 .crm-assistant-status { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--muted); font-size: 11px; }
 .crm-assistant-spin { animation: crm-assistant-spin 1s linear infinite; }
 @keyframes crm-assistant-spin { to { transform: rotate(360deg); } }
