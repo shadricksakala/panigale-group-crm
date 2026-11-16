@@ -22,8 +22,12 @@ function fail(error:unknown,fallback:string) {
   return json({error:fallback},500);
 }
 export async function GET(request:Request,{params}:RouteContext) {
-  try { const [{resource},{context,url}]=await Promise.all([params,authenticate(request)]);return json({data:await readCrmResource(env.CRM_DB,context,resource,url.searchParams.get("unitId")||"",url.searchParams.get("documentGroupId")||"")}); }
-  catch(error){return fail(error,"Unable to load CRM data.");}
+  let resource="unknown";
+  try { const [routeParams,{context,url}]=await Promise.all([params,authenticate(request)]);resource=routeParams.resource;return json({data:await readCrmResource(env.CRM_DB,context,resource,url.searchParams.get("unitId")||"",url.searchParams.get("documentGroupId")||"")}); }
+  catch(error){
+    if (!(error instanceof Response)) console.error("CRM data read failed", {resource,errorName:error instanceof Error?error.name:"UnknownError",errorMessage:error instanceof Error?error.message.slice(0,240):"Unknown failure"});
+    return fail(error,"Unable to load CRM data.");
+  }
 }
 export async function POST(request:Request,{params}:RouteContext) {
   try { await assertCrmMutation(request,env);const [{resource},{user,context}]=await Promise.all([params,authenticate(request)]);const input=await readInput(request);
