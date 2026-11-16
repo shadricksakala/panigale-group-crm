@@ -22,6 +22,13 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 - Disconnecting a mailbox requests Google grant revocation, immediately clears its encrypted Google tokens, and cancels pending sync work. Imported content is purged after the manager-set retention period. The Worker cron removes R2 objects before deleting their D1 references. If Google cannot confirm revocation, the CRM still disables its local connection and tells the user to remove the grant in Google Account security settings.
 - CRM Calendar reads a bounded event range. Create and update require an explicit review confirmation in the CRM and are recorded in the audit log.
 
+## Inbound shared-mail routing
+
+- Shared inbox routing is off by default and configured by a unit manager or CRM superadmin.
+- For an eligible new message, the CRM matches the sender's exact email address to an active contact or company in the same unit. It notifies that record's active owner if the owner has unit access. Otherwise it notifies the configured fallback teammate, who must also have active unit access.
+- The internal notification contains the sender and subject and directs the teammate to review the shared inbox. It does not forward the message body or attachments. Personal Gmail messages are never routed to another teammate.
+- Notifications use the internal outbox, idempotency keys, delivery retries, and the same company mail gateway. Routing settings and the fallback recipient are audit logged.
+
 ## Client email rules
 
 - Automatic acknowledgements are off by default and configured per business unit by its manager.
