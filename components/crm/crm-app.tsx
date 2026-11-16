@@ -201,6 +201,7 @@ const baseFields: Record<string, Field[]> = {
 export function CrmApp() {
   const [module, setModule] = useState<Module>("overview");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [themeReady, setThemeReady] = useState(false);
   const [context, setContext] = useState<Context | null>(null);
   const [selectedTenant, setSelectedTenant] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -231,11 +232,13 @@ export function CrmApp() {
       const savedTheme = window.localStorage.getItem("panigale-crm-theme");
       if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
     } catch { /* Use the light theme when browser storage is unavailable. */ }
+    setThemeReady(true);
   }, []);
 
   useEffect(() => {
+    if (!themeReady) return;
     try { window.localStorage.setItem("panigale-crm-theme", theme); } catch { /* The theme still applies for this session. */ }
-  }, [theme]);
+  }, [theme, themeReady]);
 
   function toggleTheme() {
     setTheme(value => value === "light" ? "dark" : "light");
