@@ -365,6 +365,9 @@ a { color: inherit; }
 .crm-email-row-snippet { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .crm-email-reader { display: grid; align-content: start; gap: 12px; }
 .crm-email-private-badge { width: fit-content; margin: 0; border-radius: 20px; padding: 5px 9px; color: var(--muted); background: var(--soft); font-size: 10px; }
+.crm-email-match { width: fit-content; margin: 0; border-radius: 7px; padding: 4px 7px; color: #075dde !important; background: #edf4ff; font-size: 10px !important; }
+.crm-email-row .crm-email-match { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crm-email-reader .crm-email-match { white-space: normal; overflow-wrap: anywhere; }
 .crm-email-body { min-height: 220px; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
 .crm-email-empty { display: grid; min-height: 100px; align-content: center; padding: 18px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
 .crm-email-compose { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 15px; padding: 14px; background: var(--surface); }
