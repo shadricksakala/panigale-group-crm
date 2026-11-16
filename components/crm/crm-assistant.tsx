@@ -16,6 +16,7 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
   const [draft,setDraft] = useState("");
   const [busy,setBusy] = useState(false);
   const [loading,setLoading] = useState(false);
+  const [available,setAvailable] = useState(false);
   const [error,setError] = useState("");
   const scopeKey = `${tenantId}:${unitId}`;
 
@@ -23,8 +24,8 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
     if (!open || !unitId) return;
     let cancelled = false;
     setLoading(true); setError("");
-    getJson<{ conversation: { id: string } | null; messages: (Message & { sources?: AssistantSource[] })[]; suggestions: Suggestion[] }>(`/api/ai/assistant?tenantId=${encodeURIComponent(tenantId)}&unitId=${encodeURIComponent(unitId)}`)
-      .then(result => { if (!cancelled) { setConversationId(result.conversation?.id || ""); setMessages(result.messages || []); setSuggestions(result.suggestions || []); } })
+    getJson<{ conversation: { id: string } | null; messages: (Message & { sources?: AssistantSource[] })[]; suggestions: Suggestion[]; available:boolean }>(`/api/ai/assistant?tenantId=${encodeURIComponent(tenantId)}&unitId=${encodeURIComponent(unitId)}`)
+      .then(result => { if (!cancelled) { setConversationId(result.conversation?.id || ""); setMessages(result.messages || []); setSuggestions(result.suggestions || []); setAvailable(result.available); } })
       .catch(reason => { if (!cancelled) setError(reason instanceof Error ? reason.message : "Unable to load the assistant."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -35,7 +36,7 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
   async function send(event?: FormEvent) {
     event?.preventDefault();
     const message = draft.trim();
-    if (!message || busy || !unitId) return;
+    if (!message || busy || !unitId || !available) return;
     setBusy(true); setError(""); setMessages(current => [...current,{role:"user",content:message}]); setDraft("");
     try {
       const result = await secureJson<{ conversationId:string; answer:string; sources:AssistantSource[]; suggestions:Suggestion[] }>("/api/ai/assistant","POST",{tenantId,unitId,conversationId,message});
@@ -71,8 +72,8 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
           {busy && <p className="crm-assistant-status"><LoaderCircle size={14} className="crm-assistant-spin"/>Thinking…</p>}
           {error && <p className="crm-assistant-error" role="alert">{error}</p>}
         </div>
-        <form className="crm-assistant-composer" onSubmit={send}><textarea aria-label="Ask the CRM assistant" placeholder="Ask about this business unit…" value={draft} maxLength={6000} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void send();} }}/><button className="crm-primary" type="submit" disabled={busy || !draft.trim()} aria-label="Send message"><Send size={16}/></button></form>
-        <p className="crm-assistant-footnote">AI suggestions may be wrong. Review before adding.</p>
+        <form className="crm-assistant-composer" onSubmit={send}><textarea aria-label="Ask the CRM assistant" placeholder={available?"Ask about this business unit…":"Assistant replies are not enabled yet."} value={draft} maxLength={6000} disabled={!available||busy} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void send();} }}/><button className="crm-primary" type="submit" disabled={!available||busy || !draft.trim()} aria-label="Send message"><Send size={16}/></button></form>
+        <p className="crm-assistant-footnote" role={available?undefined:"status"}>{available?"AI suggestions may be wrong. Review before adding.":"AI assistance is currently disabled for this CRM. Your saved conversation remains available."}</p>
       </>}
     </section>}
   </div>;

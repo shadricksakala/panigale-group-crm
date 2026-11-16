@@ -4,6 +4,7 @@ import { crmContext } from "../../../../lib/server/crm.mjs";
 import { containsCrmSecret, crmAssistantContext, parseCrmAssistantResponse } from "../../../../lib/server/crm-ai.mjs";
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
+const assistantAvailable = () => env.CRM_AI_ENABLED === "true" && Boolean(env.AI && typeof (env.AI as { run?: unknown }).run === "function");
 
 function restoreAssistantMessage(row: Record<string, unknown>) {
   const id = String(row.id || ""), role = String(row.role || ""), content = String(row.content || ""), created_at = String(row.created_at || "");
@@ -47,12 +48,12 @@ export async function GET(request: Request) {
     const { user, context } = await authenticate(request, url.searchParams.get("tenantId") || "");
     if (!context.unitIds.includes(unitId)) return json({ error: "Choose a business unit you can access." }, 403);
     const conversation = await env.CRM_DB.prepare("SELECT id,title FROM crm_ai_conversations WHERE tenant_id=? AND unit_id=? AND user_id=? ORDER BY updated_at DESC LIMIT 1").bind(context.tenantId,unitId,user.id).first();
-    if (!conversation) return json({ conversation: null, messages: [] });
+    if (!conversation) return json({ conversation: null, messages: [], available: assistantAvailable() });
     const [messages, suggestions] = await Promise.all([
       env.CRM_DB.prepare("SELECT id,role,content,created_at FROM crm_ai_messages WHERE conversation_id=? ORDER BY created_at DESC LIMIT 40").bind(conversation.id).all(),
       env.CRM_DB.prepare("SELECT id,kind,payload_json,status FROM crm_ai_suggestions WHERE conversation_id=? AND status='pending' ORDER BY created_at").bind(conversation.id).all(),
     ]);
-    return json({ conversation, messages: (messages.results || []).reverse().map(restoreAssistantMessage), suggestions: (suggestions.results || []).map(row => ({ id: row.id, kind: row.kind, ...JSON.parse(String(row.payload_json)) })) });
+    return json({ conversation, messages: (messages.results || []).reverse().map(restoreAssistantMessage), suggestions: (suggestions.results || []).map(row => ({ id: row.id, kind: row.kind, ...JSON.parse(String(row.payload_json)) })), available: assistantAvailable() });
   } catch (error) {
     if (error instanceof Response) return error;
     console.error("crm_ai_history_read_failed", { name: error instanceof Error ? error.name : "unknown" });
