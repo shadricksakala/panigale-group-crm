@@ -8,7 +8,7 @@ async function connectionFor(request:Request,tenantId:string,unitId:string,conne
   const user=await getPanigaleCrmUser(request,env);if(!user)throw new Response("Sign in to continue.",{status:401});
   const context=await crmContext(env.CRM_DB,user.id,tenantId);if(!context.tenant||!context.unitIds.includes(unitId))throw new Response("You do not have access to this business unit.",{status:403});
   const connection=await env.CRM_DB.prepare("SELECT * FROM crm_google_connections WHERE tenant_id=? AND unit_id=? AND id=? AND status='active'").bind(context.tenantId,unitId,connectionId).first();
-  if(!connection||connection.connection_scope==="personal"&&connection.owner_user_id!==user.id)throw new Response("Calendar connection not found.",{status:404});
+  if(!connection||connection.connection_scope!=="personal"||connection.owner_user_id!==user.id||!String(connection.granted_scopes||"").split(" ").includes("https://www.googleapis.com/auth/calendar.events"))throw new Response("Calendar connection not found.",{status:404});
   return {user,context,connection};
 }
 async function calendarFetch(token:string,calendarId:string,path:string,method="GET",body?:unknown):Promise<any>{
@@ -23,7 +23,7 @@ export async function GET(request:Request){
     const context=await crmContext(env.CRM_DB,user.id,tenantId);if(!context.tenant||!context.unitIds.includes(unitId))return json({error:"Choose a business unit you can access."},403);
     const start=url.searchParams.get("timeMin")||new Date().toISOString(),end=url.searchParams.get("timeMax")||new Date(Date.now()+30*86400000).toISOString();
     if(!Number.isFinite(Date.parse(start))||!Number.isFinite(Date.parse(end))||Date.parse(end)<=Date.parse(start)||Date.parse(end)-Date.parse(start)>93*86400000)return json({error:"Choose a valid calendar range of up to 93 days."},400);
-    const {results=[]}=await env.CRM_DB.prepare("SELECT * FROM crm_google_connections WHERE tenant_id=? AND unit_id=? AND status='active' AND (connection_scope='shared' OR owner_user_id=?) ORDER BY connection_scope,email").bind(context.tenantId,unitId,user.id).all();
+    const {results=[]}=await env.CRM_DB.prepare("SELECT * FROM crm_google_connections WHERE tenant_id=? AND unit_id=? AND status='active' AND connection_scope='personal' AND owner_user_id=? AND instr(' '||granted_scopes||' ',' https://www.googleapis.com/auth/calendar.events ' )>0 ORDER BY email").bind(context.tenantId,unitId,user.id).all();
     const calendars=await Promise.all(results.map(async(connection:any)=>{
       try{const token=await googleAccessToken(env.CRM_DB,env,connection);const data=await calendarFetch(token,String(connection.calendar_id||"primary"),`?singleEvents=true&orderBy=startTime&maxResults=250&timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}`);return {connectionId:connection.id,email:connection.email,scope:connection.connection_scope,events:(data.items||[]).map((event:any)=>({id:event.id,summary:event.summary||"(No title)",description:event.description||"",location:event.location||"",start:event.start?.dateTime||event.start?.date||"",end:event.end?.dateTime||event.end?.date||"",htmlLink:event.htmlLink||"",status:event.status||"confirmed"}))};}
       catch(error){if(error instanceof Response)return {connectionId:connection.id,email:connection.email,scope:connection.connection_scope,error:error.status===401?"Reconnect this Google account.":"Calendar could not be loaded."};throw error;}

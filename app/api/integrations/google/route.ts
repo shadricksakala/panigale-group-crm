@@ -31,6 +31,7 @@ export async function POST(request:Request){
     const input=await request.json() as {tenantId?:unknown;unitId?:unknown;scope?:unknown};
     const tenantId=typeof input.tenantId==="string"?input.tenantId.slice(0,100):"",unitId=typeof input.unitId==="string"?input.unitId.slice(0,100):"",scope=input.scope==="shared"?"shared":"personal";
     const context=await crmContext(env.CRM_DB,user.id,tenantId);if(!context.tenant||!context.unitIds.includes(unitId))return json({error:"You do not have access to this business unit."},403);
+    if(scope==="shared"&&!await manager(context.tenantId,unitId,user.id))return json({error:"A business unit manager must connect a shared mailbox."},403);
     const result=await beginGoogleConnection(env.CRM_DB,env,{user,tenantId:context.tenantId,unitId,scope});
     return Response.json({authorizationUrl:result.url},{status:200,headers:{"cache-control":"no-store","set-cookie":googleFlowCookie(request,env,result.flowId)}});
   }catch(error){if(error instanceof Response)return json({error:await error.text()},error.status);console.error("crm_google_connect_start_failed",{name:error instanceof Error?error.name:"unknown"});return json({error:"Unable to start Google authorization."},500);}

@@ -12,17 +12,18 @@ Configure these Worker values. `GOOGLE_OAUTH_CLIENT_SECRET` and `CRM_INTEGRATION
 - Secret `GOOGLE_OAUTH_CLIENT_SECRET`
 - Secret `CRM_INTEGRATION_ENCRYPTION_KEY`
 
-The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, and Calendar event read/write. Google may require OAuth consent-screen setup and review before external users can grant Gmail access. No Google account is connected until its owner completes consent.
+Personal Google connections request `openid`, `email`, `profile`, Gmail read-only, and Calendar event read/write. Shared business mailbox connections request only `openid`, `email`, `profile`, and Gmail read-only. A shared mailbox grant never authorizes calendar access. Google may require OAuth consent-screen setup and review before users can grant Gmail access. No Google account is connected until its owner completes consent.
 
 ## Mailbox boundaries and retention
 
 - Personal mailbox messages are tagged with their CRM owner and returned only to that owner.
-- A shared Gmail address can be active in only one business unit per tenant. OAuth completion checks this and D1 insert/update triggers enforce it under concurrent requests. Messages are scoped to that unit; only users assigned there can read them. Unit managers and CRM superadmins manage the connection and retention setting. Cross-unit sharing requires a separately designed, explicit superadmin grant with audit coverage; reconnecting the same address in multiple units is not a sharing mechanism.
+- A shared Gmail address can be active in only one business unit per tenant. Only a unit manager or CRM superadmin can connect, disconnect, or change retention for it. OAuth completion checks the one-unit boundary and D1 insert/update triggers enforce it under concurrent requests. Messages are scoped to that unit; only users assigned there can read them. Cross-unit sharing requires a separately designed, explicit superadmin grant with audit coverage; reconnecting the same address in multiple units is not a sharing mechanism.
+- Google Calendar is available only through a personal Google connection and only to its owner. Calendar event reads and writes reject shared mailbox connection IDs, even if an older shared connection's stored grant includes Calendar scope.
 - Inbox page reads are audit logged with the unit, result count, pagination offset, and mailbox scopes involved. Search terms, addresses, subjects, and message bodies are not copied into the audit event.
 - Gmail is read-only. New connections queue a full mailbox history import, then periodic Gmail history checks. Message bodies are stored in CRM D1; attachments up to 25 MB each are copied into the CRM R2 bucket.
 - The first history import never auto-replies to or routes old mail. Only eligible inbox messages received at or after the mailbox connection time can trigger shared-mail automation. The original Gmail history cursor is preserved through import so mail arriving during the backfill is picked up by incremental sync.
 - Disconnecting a mailbox requests Google grant revocation, immediately clears its encrypted Google tokens, and cancels pending sync work. Imported content is purged after the manager-set retention period. The Worker cron removes R2 objects before deleting their D1 references. If Google cannot confirm revocation, the CRM still disables its local connection and tells the user to remove the grant in Google Account security settings.
-- CRM Calendar reads a bounded event range. Create and update require an explicit review confirmation in the CRM and are recorded in the audit log.
+- Personal CRM Calendar reads a bounded event range and is private to the account owner. Create and update require an explicit review confirmation in the CRM and are recorded in the audit log.
 
 ## Inbound shared-mail routing
 
@@ -55,3 +56,5 @@ HAVING COUNT(DISTINCT unit_id)>1;
 ```
 
 Resolve any returned rows through an approved owner/superadmin review before relying on the one-unit invariant; do not delete imported messages or connection data as an automatic migration step.
+
+Shared Gmail connections created before the scope separation may have a stored Calendar grant. The CRM no longer reads or writes calendars through shared connection IDs. Ask a unit manager to disconnect and reconnect each shared mailbox so Google can revoke the broader grant and issue a Gmail-only grant; imported mail remains subject to its existing retention policy. Do not revoke a live shared-mailbox token automatically during a schema migration.
