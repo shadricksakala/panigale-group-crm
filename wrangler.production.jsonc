@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "./dist/client" },
   "ai": { "binding": "AI" },
-  "triggers": { "crons": ["*/15 * * * *"] },
+  "triggers": { "crons": ["*/15 * * * *", "0 3 * * *"] },
   "routes": [
     { "pattern": "crm.panigale.tech", "custom_domain": true, "zone_name": "panigale.tech", "enabled": true, "previews_enabled": false }
   ],
@@ -19,7 +19,8 @@
     }
   ],
   "r2_buckets": [
-    { "binding": "CRM_DOCUMENTS", "bucket_name": "panigale-group-crm-documents-production" }
+    { "binding": "CRM_DOCUMENTS", "bucket_name": "panigale-group-crm-documents-production" },
+    { "binding": "CRM_DOCUMENTS_BACKUP", "bucket_name": "panigale-group-crm-backups-production" }
   ],
   "send_email": [
     { "name": "CRM_EMAIL", "remote": true, "allowed_sender_addresses": ["panipay@panigale.tech", "euroza@panigale.tech"] }

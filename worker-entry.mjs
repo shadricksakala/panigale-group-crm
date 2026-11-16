@@ -2,6 +2,7 @@ import application from "./dist/server/index.js";
 import { purgeDisconnectedGoogleMail, queueCrmReminderEmails } from "./lib/server/crm-reminders.mjs";
 import { processGoogleMailSync } from "./lib/server/gmail-sync.mjs";
 import { deliverCrmEmailOutbox, deliverCrmSupportOutbox } from "./lib/server/mail-delivery.mjs";
+import { backupCrmDocuments } from "./lib/server/crm-document-backup.mjs";
 
 export default {
   async fetch(request, env, ctx) {
@@ -22,6 +23,14 @@ export default {
   },
   async scheduled(controller, env, ctx) {
     if (env.CRM_SCHEDULED_JOBS_ENABLED !== "true") return;
+    if (controller.cron === "0 3 * * *") {
+      ctx.waitUntil(backupCrmDocuments(env.CRM_DB,env.CRM_DOCUMENTS,env.CRM_DOCUMENTS_BACKUP,controller.scheduledTime).then(result=>{
+        console.info("crm_document_backup_completed",result);
+      }).catch(error=>{
+        console.error("crm_document_backup_failed",{code:error?.code||"backup_error",name:error instanceof Error?error.name:"unknown",...(error?.result||{})});
+      }));
+      return;
+    }
     ctx.waitUntil(queueCrmReminderEmails(env.CRM_DB, controller.scheduledTime, env.CRM_EMAIL_SEND_ENABLED === "true" && Boolean(env.CRM_MAILER)).then(result => {
       console.info("crm_reminder_scan_completed", result);
     }).catch(error => {

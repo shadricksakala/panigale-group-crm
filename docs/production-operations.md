@@ -69,7 +69,7 @@ For the normal application build, use `npm run build` before either Wrangler com
 
 ## Encrypted long-term D1 exports
 
-The prepared workflow in `.github/workflows/backup-d1.yml` is designed to export the production CRM D1 database once per day, encrypt the SQL dump with AES-256-GCM, upload it to the private `panigale-group-crm-backups-production` R2 bucket, read it back, and verify the authentication tag and SQL format. The bucket is currently empty. After setup, plaintext will exist only in the ephemeral GitHub runner's temporary directory and will be removed before upload. The backup key is never stored in this repository or Cloudflare Worker.
+The prepared workflow in `.github/workflows/backup-d1.yml` is designed to export the production CRM D1 database once per day, encrypt the SQL dump with AES-256-GCM, upload it to the private `panigale-group-crm-backups-production` R2 bucket, read it back, and verify the authentication tag and SQL format. No D1 export has been uploaded yet. After setup, plaintext will exist only in the ephemeral GitHub runner's temporary directory and will be removed before upload. The backup key is never stored in this repository or Cloudflare Worker.
 
 Before enabling the workflow, configure these GitHub repository settings:
 
@@ -79,8 +79,8 @@ Before enabling the workflow, configure these GitHub repository settings:
 
 Run the `Encrypted CRM D1 backup` workflow manually after configuration and confirm its R2 read-back verification succeeds. Scheduled runs start only from the repository's default branch. A missing or expired GitHub Actions billing allowance will prevent scheduled backups and must be monitored as an external prerequisite.
 
-### Restore rehearsal and R2 document backups
+### Restore rehearsal
 
-- A long-term D1 export is not a restore rehearsal. Download one encrypted object using authorized Cloudflare access, decrypt it only on a secured operator machine, and import it into a new non-production D1 database before validating migration state and representative records. Never rehearse on the active production database.
-- The CRM document bucket `CRM_DOCUMENTS` still needs a separate backup plan and a rehearsal with synthetic documents. Do not describe the D1 export workflow as covering R2 files.
+- A daily Worker cron mirrors indexed document objects from `CRM_DOCUMENTS` into the separate private `CRM_DOCUMENTS_BACKUP` bucket. It retains archived and prior document versions, skips objects whose size and etag already match, and logs only aggregate copy counts. The first production mirror has not run yet; verify its completion in Worker logs.
+- A long-term D1 export and an R2 mirror are not restore rehearsals. Download one encrypted SQL object using authorized Cloudflare access, decrypt it only on a secured operator machine, and import it into a new non-production D1 database. Copy a synthetic document from the R2 backup into a separate non-production bucket and verify its hash and metadata. Never rehearse on the active production database.
 - Keep the PaniPay CRM rollback deployment until the D1 restore rehearsal, R2 document recovery, mobile verification, auth/integration checks, and tenant isolation checks are complete. Remember that the PaniPay CRM cannot restore standalone CRM writes.
