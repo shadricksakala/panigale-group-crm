@@ -27,7 +27,7 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 ## Inbound shared-mail routing
 
 - Shared inbox routing is off by default and configured by a unit manager or CRM superadmin.
-- For an eligible new message, the CRM matches the sender's exact email address to an active contact or company in the same unit. It notifies that record's active owner if the owner has unit access. Otherwise it notifies the configured fallback teammate, who must also have active unit access.
+- For an eligible new message, the CRM matches the sender's exact email address within the same unit. A single active contact or company match is linked to the message and its active owner is notified if they have unit access. Ambiguous matches are left unlinked and routed to the configured fallback teammate, who must also have active unit access.
 - The internal notification contains the sender and subject and directs the teammate to review the shared inbox. It does not forward the message body or attachments. Personal Gmail messages are never routed to another teammate.
 - Notifications use the internal outbox, idempotency keys, delivery retries, and the same company mail gateway. Routing settings and the fallback recipient are audit logged.
 
