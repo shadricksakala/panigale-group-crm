@@ -346,9 +346,10 @@ export function CrmApp() {
   }
   async function runPaniPayAction(invoice: Row, action: "send" | "refresh") {
     if (!context?.tenant) return;
+    if(action==="send"&&!window.confirm(`Review and approve sending “${String(invoice.title||"Invoice")}” (${(Number(invoice.amount_minor||0)/100).toFixed(2)} ${String(invoice.currency||"ZMW")}) to its linked client by email through PaniPay?`))return;
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await secureJson<{ paymentUrl?: string; imported?: number }>(`/api/crm/invoices/${encodeURIComponent(invoice.id)}/panipay`, "POST", { tenantId: context.tenant.id, action });
+      const result = await secureJson<{ paymentUrl?: string; imported?: number }>(`/api/crm/invoices/${encodeURIComponent(invoice.id)}/panipay`, "POST", { tenantId: context.tenant.id, action, ...(action==="send"?{confirmed:true}:{}) });
       await load();
       setNotice(action === "send" ? "Invoice sent through PaniPay. The customer can pay using the hosted checkout link." : result.imported ? `${result.imported} confirmed PaniPay payment(s) added to invoice history.` : "PaniPay checked. No new confirmed payments were found.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to complete the PaniPay action."); }

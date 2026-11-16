@@ -143,6 +143,8 @@ CREATE TABLE crm_email_sync_jobs (
   status TEXT NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','running','complete','failed','cancelled')),
   cursor TEXT,
   imported_count INTEGER NOT NULL DEFAULT 0,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TEXT,
   last_error_code TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -153,7 +155,7 @@ CREATE INDEX crm_google_connections_unit_idx ON crm_google_connections(tenant_id
 CREATE INDEX crm_email_messages_unit_date_idx ON crm_email_messages(tenant_id,unit_id,received_at DESC);
 CREATE INDEX crm_email_messages_private_owner_idx ON crm_email_messages(tenant_id,unit_id,private_owner_user_id,received_at DESC);
 CREATE INDEX crm_email_drafts_approval_idx ON crm_email_drafts(tenant_id,unit_id,status,created_at DESC);
-CREATE INDEX crm_email_sync_jobs_queue_idx ON crm_email_sync_jobs(status,created_at);
+CREATE INDEX crm_email_sync_jobs_queue_idx ON crm_email_sync_jobs(status,next_attempt_at,created_at);
 CREATE UNIQUE INDEX crm_email_sync_one_active_job ON crm_email_sync_jobs(connection_id,job_kind) WHERE status IN ('queued','running');
 CREATE INDEX crm_email_unit_settings_scope_idx ON crm_email_unit_settings(tenant_id,unit_id);
 CREATE INDEX crm_client_email_outbox_queue_idx ON crm_client_email_outbox(status,created_at);
