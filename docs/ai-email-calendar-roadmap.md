@@ -4,6 +4,8 @@
 
 Make the CRM a lively, useful relationship workspace for Panigale Group companies. It should help a teammate remember who needs attention, understand recent client communication, prepare the next step, and coordinate work across authorized business units. It links to PaniPay and other group platforms; it does not replace them.
 
+The broader consulting lifecycle, MVP modules, later operational extensions, and internal SaaS direction are in [the product roadmap](product-roadmap.md). This document focuses on the AI, reminders, Gmail, Calendar, and email delivery slice of that roadmap.
+
 The CRM remains private by business unit by default. Personal mailbox data is private to the connecting user. A shared mailbox belongs to one tenant and one business unit. Cross-unit sharing is not implemented; it would require a separately designed CRM superadmin grant and an audit event. Never trust tenant, unit, role, or user IDs supplied by the browser as authority.
 
 ## PaniPay AI as a starting point
