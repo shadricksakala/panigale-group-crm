@@ -75,7 +75,7 @@ Before enabling the workflow, configure these GitHub repository settings:
 
 - Secret `CLOUDFLARE_API_TOKEN`: a Cloudflare token limited to the CRM account, D1 export/read access, and read/write access to the dedicated CRM backup bucket.
 - Variable `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID that owns the CRM D1 database and backup bucket.
-- Secret `CRM_BACKUP_ENCRYPTION_KEY`: a canonical base64-encoded random 32-byte key. Generate it locally with `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64')+'\\n')"`; add the output directly to GitHub and keep a separately secured recovery copy. Never paste the key into chat or commit it. Preserve the current key for every existing backup; key rotation requires retaining the old key for older exports.
+- Secret `CRM_BACKUP_ENCRYPTION_KEY`: a canonical base64-encoded random 32-byte key. Generate it locally with `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64'))"`; add the output directly to GitHub and keep a separately secured recovery copy. Never paste the key into chat or commit it. Preserve the current key for every existing backup; key rotation requires retaining the old key for older exports.
 
 Run the `Encrypted CRM D1 backup` workflow manually after configuration and confirm its R2 read-back verification succeeds. Scheduled runs start only from the repository's default branch. A missing or expired GitHub Actions billing allowance will prevent scheduled backups and must be monitored as an external prerequisite.
 
