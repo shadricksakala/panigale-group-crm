@@ -32,7 +32,7 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 ## Client email rules
 
 - Automatic acknowledgements are off by default and configured per business unit by its manager.
-- When enabled, only a plain receipt acknowledgement is queued to the original sender. Mailing-list and automated messages are excluded.
+- When enabled, only a plain receipt acknowledgement is queued to the original sender from a shared company mailbox. Personal Gmail connections never trigger automatic client email. Mailing-list and automated messages are excluded.
 - Substantive client emails enter the approval queue. The author or a unit manager may approve or reject; approvals create an idempotent delivery outbox entry.
 - Delivery remains disabled until a company mail-server adapter and its Cloudflare credentials are configured. Approval does not send mail by itself.
 

@@ -58,7 +58,7 @@ The CRM already follows these patterns in `app/api/ai/assistant/route.ts` and `l
 ### 6. Email sending and approvals
 
 - Keep inbound monitoring and outbound delivery as separate permissions and settings.
-- Optional automatic replies may send only a plain receipt acknowledgement to the original sender, after the unit manager enables the feature. Exclude mailing lists, bounce addresses, and automated/system messages; enforce loop prevention, rate limits, and idempotency.
+- Optional automatic replies may send only a plain receipt acknowledgement to the original sender from a shared company mailbox, after the unit manager enables the feature. Personal Gmail connections never trigger automatic client email. Exclude mailing lists, bounce addresses, and automated/system messages; enforce loop prevention, rate limits, and idempotency.
 - For shared inboxes, optionally notify the active owner of an exact sender-matched contact/company; otherwise use a unit manager-configured fallback teammate. The notification identifies the sender and subject and links staff back to the shared inbox without forwarding message contents. Personal mailbox data is never routed to colleagues.
 - Any substantive client email requires an approval before delivery. Show recipient, subject, full body, sender mailbox, related CRM record, and approval history. The author or authorized manager can approve/reject according to the configured policy.
 - Internal emails (for example, reminders) use separate templates, recipient resolution, and settings. “Send to the right recipient” must resolve from an assigned owner/manager or explicit CRM relationship, show the resolved recipient, and avoid guessed addresses.
