@@ -1,6 +1,56 @@
 import { env } from "cloudflare:workers";
-import { assertCrmMutation,getPanigaleCrmUser } from "../../../../../lib/server/panigale-auth.mjs";
+import { assertCrmMutation, getPanigaleCrmUser } from "../../../../../lib/server/panigale-auth.mjs";
 import { crmContext } from "../../../../../lib/server/crm.mjs";
-const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{"cache-control":"no-store"}});
-async function manager(tenantId:string,unitId:string,userId:string){const row=await env.CRM_DB.prepare("SELECT m.role,a.unit_role FROM crm_memberships m LEFT JOIN crm_unit_access a ON a.tenant_id=m.tenant_id AND a.user_id=m.user_id AND a.unit_id=? WHERE m.tenant_id=? AND m.user_id=?").bind(unitId,tenantId,userId).first();return row?.role==="superadmin"||row?.unit_role==="manager";}
-export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){try{await assertCrmMutation(request,env);const user=await getPanigaleCrmUser(request,env);if(!user)return json({error:"Sign in to continue."},401);const {id}=await params,input=await request.json() as {tenantId?:unknown;action?:unknown},tenantId=typeof input.tenantId==="string"?input.tenantId.slice(0,100):"";if(!["approve","reject"].includes(String(input.action)))return json({error:"Choose approve or reject."},400);const context=await crmContext(env.CRM_DB,user.id,tenantId),draft=await env.CRM_DB.prepare("SELECT * FROM crm_email_drafts WHERE tenant_id=? AND id=?").bind(context.tenantId,id).first();if(!draft||!context.unitIds.includes(String(draft.unit_id))||draft.private_owner_user_id&&draft.private_owner_user_id!==user.id)return json({error:"Email draft not found."},404);if(draft.status!=="pending_approval"||draft.message_kind!=="client")return json({error:"This draft is not waiting for client email approval."},409);if(draft.created_by_user_id!==user.id&&!await manager(context.tenantId,String(draft.unit_id),user.id))return json({error:"Only the author or a unit manager may approve this draft."},403);const approved=input.action==="approve";if(approved){await env.CRM_DB.batch([env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='queued',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id,context.tenantId,id),env.CRM_DB.prepare(`INSERT OR IGNORE INTO crm_client_email_outbox(id,tenant_id,unit_id,draft_id,recipient_email,subject,body_text,idempotency_key,status) VALUES(?,?,?,?,?,?,?,?,'queued')`).bind(crypto.randomUUID(),context.tenantId,draft.unit_id,id,draft.recipient_email,draft.subject,draft.body_text,`crm-client-email:${id}`)]);}else await env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='rejected',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id,context.tenantId,id).run();await env.CRM_DB.prepare("INSERT INTO crm_audit_events(id,tenant_id,unit_id,actor_user_id,action,entity_type,entity_id,metadata_json) VALUES(?,?,?,?,?,'email_draft',?,?)").bind(crypto.randomUUID(),context.tenantId,draft.unit_id,user.id,approved?"crm.email.approved":"crm.email.rejected",id,JSON.stringify({deliveryQueued:approved})).run();return json({id,status:approved?"queued":"rejected",emailDeliveryReady:false});}catch(error){if(error instanceof Response)return json({error:await error.text()},error.status);return json({error:"Unable to update email approval."},500);}}
+import { getVerifiedCrmMailSender } from "../../../../../lib/server/mail-delivery.mjs";
+
+const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
+
+async function manager(tenantId: string, unitId: string, userId: string) {
+  const row = await env.CRM_DB.prepare("SELECT m.role,a.unit_role FROM crm_memberships m LEFT JOIN crm_unit_access a ON a.tenant_id=m.tenant_id AND a.user_id=m.user_id AND a.unit_id=? WHERE m.tenant_id=? AND m.user_id=?").bind(unitId, tenantId, userId).first();
+  return row?.role === "superadmin" || row?.unit_role === "manager";
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await assertCrmMutation(request, env);
+    const user = await getPanigaleCrmUser(request, env);
+    if (!user) return json({ error: "Sign in to continue." }, 401);
+    const { id } = await params;
+    const input = await request.json() as { tenantId?: unknown; action?: unknown };
+    const tenantId = typeof input.tenantId === "string" ? input.tenantId.slice(0, 100) : "";
+    if (!["approve", "reject"].includes(String(input.action))) return json({ error: "Choose approve or reject." }, 400);
+
+    const context = await crmContext(env.CRM_DB, user.id, tenantId);
+    const draft = await env.CRM_DB.prepare("SELECT * FROM crm_email_drafts WHERE tenant_id=? AND id=?").bind(context.tenantId, id).first();
+    if (!draft || !context.unitIds.includes(String(draft.unit_id)) || (draft.private_owner_user_id && draft.private_owner_user_id !== user.id)) return json({ error: "Email draft not found." }, 404);
+    if (draft.status !== "pending_approval" || draft.message_kind !== "client") return json({ error: "This draft is not waiting for client email approval." }, 409);
+    if (draft.created_by_user_id !== user.id && !await manager(context.tenantId, String(draft.unit_id), user.id)) return json({ error: "Only the author or a unit manager may approve this draft." }, 403);
+
+    const approved = input.action === "approve";
+    let senderEmail: string | null = null;
+    if (approved) {
+      if (env.CRM_EMAIL_SEND_ENABLED !== "true" || !env.CRM_MAILER) return json({ error: "Client email delivery is not configured. The draft remains pending approval." }, 503);
+      senderEmail = await getVerifiedCrmMailSender(env.CRM_MAILER, context.tenantId, String(draft.unit_id));
+      if (!senderEmail) return json({ error: "This business unit has no verified company sender. The draft remains pending approval." }, 503);
+    }
+
+    const audit = env.CRM_DB.prepare("INSERT INTO crm_audit_events(id,tenant_id,unit_id,actor_user_id,action,entity_type,entity_id,metadata_json) VALUES(?,?,?,?,?,'email_draft',?,?)")
+      .bind(crypto.randomUUID(), context.tenantId, draft.unit_id, user.id, approved ? "crm.email.approved" : "crm.email.rejected", id, JSON.stringify({ deliveryQueued: approved, ...(senderEmail ? { senderEmail } : {}) }));
+    if (approved) {
+      await env.CRM_DB.batch([
+        env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='queued',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id, context.tenantId, id),
+        env.CRM_DB.prepare("INSERT OR IGNORE INTO crm_client_email_outbox(id,tenant_id,unit_id,draft_id,recipient_email,subject,body_text,idempotency_key,status) VALUES(?,?,?,?,?,?,?,?,'queued')").bind(crypto.randomUUID(), context.tenantId, draft.unit_id, id, draft.recipient_email, draft.subject, draft.body_text, `crm-client-email:${id}`),
+        audit,
+      ]);
+    } else {
+      await env.CRM_DB.batch([
+        env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='rejected',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id, context.tenantId, id),
+        audit,
+      ]);
+    }
+    return json({ id, status: approved ? "queued" : "rejected", senderEmail });
+  } catch (error) {
+    if (error instanceof Response) return json({ error: await error.text() }, error.status);
+    return json({ error: "Unable to update email approval." }, 500);
+  }
+}
