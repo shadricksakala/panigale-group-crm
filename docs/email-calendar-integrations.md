@@ -19,7 +19,7 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 - Personal mailbox messages are tagged with their CRM owner and returned only to that owner.
 - Shared mailbox messages are scoped to one tenant and business unit. Only users assigned to that unit can read them; unit managers and CRM superadmins manage the connection and retention setting.
 - Gmail is read-only. New connections queue a full mailbox history import, then periodic Gmail history checks. Message bodies are stored in CRM D1; attachments up to 25 MB each are copied into the CRM R2 bucket.
-- Disconnecting a mailbox immediately clears its encrypted Google tokens and cancels pending sync work. Imported content is purged after the manager-set retention period. The Worker cron removes R2 objects before deleting their D1 references.
+- Disconnecting a mailbox requests Google grant revocation, immediately clears its encrypted Google tokens, and cancels pending sync work. Imported content is purged after the manager-set retention period. The Worker cron removes R2 objects before deleting their D1 references. If Google cannot confirm revocation, the CRM still disables its local connection and tells the user to remove the grant in Google Account security settings.
 - CRM Calendar reads a bounded event range. Create and update require an explicit review confirmation in the CRM and are recorded in the audit log.
 
 ## Client email rules
