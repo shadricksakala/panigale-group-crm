@@ -542,6 +542,6 @@ a { color: inherit; }
 .crm-reminder-email-setting small,.crm-reminder-email-setting p { margin: 0; color: var(--muted); font-size: 10px; }
 .crm-reminder-email-setting [role="alert"] { color: #a3313b; }
 @media (max-width: 650px) {
-  .crm-assistant-anchor > .crm-icon-button { width: 36px; height: 36px; }
+  .crm-assistant-anchor > .crm-icon-button { display: grid; width: 36px; height: 36px; place-items: center; }
   .crm-assistant-panel { right: 12px; bottom: calc(70px + env(safe-area-inset-bottom)); width: calc(100vw - 24px); height: min(720px,calc(100dvh - 115px - env(safe-area-inset-bottom))); }
 }
