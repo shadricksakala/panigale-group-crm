@@ -21,13 +21,16 @@
   "r2_buckets": [
     { "binding": "CRM_DOCUMENTS", "bucket_name": "panigale-group-crm-documents-production" }
   ],
+  "send_email": [
+    { "name": "CRM_EMAIL", "remote": true, "allowed_sender_addresses": ["panipay@panigale.tech", "euroza@panigale.tech"] }
+  ],
   "vars": {
     "CRM_PUBLIC_URL": "https://crm.panigale.tech",
     "AUTH_ISSUER": "https://auth.panigale.tech",
     "PANIGALE_AUTH_CLIENT_ID": "pg_ad413e72881fcd82d923e8e9bdd4f6af",
     "CRM_AI_ENABLED": "false",
     "CRM_AI_MODEL": "@cf/openai/gpt-oss-20b",
-    "CRM_EMAIL_SEND_ENABLED": "false",
+    "CRM_EMAIL_SEND_ENABLED": "true",
     "CRM_READ_ONLY_MODE": "false",
     "CRM_SCHEDULED_JOBS_ENABLED": "true"
   },

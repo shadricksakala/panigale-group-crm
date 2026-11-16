@@ -33,7 +33,7 @@ export default {
     ctx.waitUntil(processGoogleMailSync(env.CRM_DB,env.CRM_DOCUMENTS,env,6).then(result=>{
       if(result.checked||result.imported)console.info("crm_gmail_sync_scan_completed",result);
     }).catch(error=>console.error("crm_gmail_sync_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
-    ctx.waitUntil(deliverCrmEmailOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
+    ctx.waitUntil(deliverCrmEmailOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
       if(result.attempted)console.info("crm_mail_delivery_scan_completed",result);
     }).catch(error=>console.error("crm_mail_delivery_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
     ctx.waitUntil(deliverCrmSupportOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
