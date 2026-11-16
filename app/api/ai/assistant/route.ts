@@ -116,7 +116,7 @@ export async function POST(request: Request) {
       ...(crmData.leads || []).map((row: any) => `lead:${row.id}`),
       ...(crmData.projects || []).map((row: any) => `project:${row.id}`),
     ];
-    const result = parseCrmAssistantResponse(raw,validRecordIds,crmData.sources);
+    const result = parseCrmAssistantResponse(raw,validRecordIds,crmData.sources,crmData.financialAccess);
     const suggestions: Array<{ id: string; kind: string; title: string; details: string; dueAt: string | null; linkType: string | null; linkId: string | null }> = result.suggestions.map((item: { kind: string; title: string; details: string; dueAt: string | null; linkType: string | null; linkId: string | null }) => ({ id: crypto.randomUUID(), ...item }));
     const statements = [
       env.CRM_DB.prepare("INSERT INTO crm_ai_messages(id,conversation_id,role,content) VALUES(?,?,?,?)").bind(crypto.randomUUID(),conversation.id,"user",message),
