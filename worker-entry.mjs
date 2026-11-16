@@ -1,5 +1,7 @@
 import application from "./dist/server/index.js";
-import { queueCrmReminderEmails } from "./lib/server/crm-reminders.mjs";
+import { purgeDisconnectedGoogleMail, queueCrmReminderEmails } from "./lib/server/crm-reminders.mjs";
+import { processGoogleMailSync } from "./lib/server/gmail-sync.mjs";
+import { deliverCrmEmailOutbox } from "./lib/server/mail-delivery.mjs";
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,5 +26,14 @@ export default {
     }).catch(error => {
       console.error("crm_reminder_scan_failed", { name: error instanceof Error ? error.name : "unknown" });
     }));
+    ctx.waitUntil(purgeDisconnectedGoogleMail(env.CRM_DB,env.CRM_DOCUMENTS,controller.scheduledTime).then(result=>{
+      if(result.expiredConnections)console.info("crm_mail_retention_purge_completed",result);
+    }).catch(error=>console.error("crm_mail_retention_purge_failed",{name:error instanceof Error?error.name:"unknown"})));
+    ctx.waitUntil(processGoogleMailSync(env.CRM_DB,env.CRM_DOCUMENTS,env,6).then(result=>{
+      if(result.checked||result.imported)console.info("crm_gmail_sync_scan_completed",result);
+    }).catch(error=>console.error("crm_gmail_sync_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
+    ctx.waitUntil(deliverCrmEmailOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
+      if(result.attempted)console.info("crm_mail_delivery_scan_completed",result);
+    }).catch(error=>console.error("crm_mail_delivery_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
   },
 };

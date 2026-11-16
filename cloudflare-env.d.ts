@@ -7,6 +7,11 @@ interface CloudflareEnv {
   CRM_BOOTSTRAP_OWNER_EMAIL?: string;
   CRM_AI_ENABLED?: string;
   CRM_AI_MODEL?: string;
+  GOOGLE_OAUTH_CLIENT_ID?: string;
+  GOOGLE_OAUTH_CLIENT_SECRET?: string;
+  CRM_INTEGRATION_ENCRYPTION_KEY?: string;
+  CRM_EMAIL_SEND_ENABLED?: string;
+  CRM_MAILER?: Fetcher;
   AI?: Ai;
 }
 

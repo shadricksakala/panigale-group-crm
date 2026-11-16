@@ -1,0 +1,34 @@
+# Email and calendar integrations
+
+## Google OAuth setup
+
+The CRM uses the Google OAuth authorization code flow with PKCE. Register this exact redirect URI on a Google OAuth web application:
+
+`https://crm.panigale.tech/api/integrations/google/callback`
+
+Configure these Worker values. `GOOGLE_OAUTH_CLIENT_SECRET` and `CRM_INTEGRATION_ENCRYPTION_KEY` must be Cloudflare secrets. The encryption key is 32 random bytes encoded as 64 hexadecimal characters; do not commit it or reuse the Panigale Auth or PaniPay keys.
+
+- `GOOGLE_OAUTH_CLIENT_ID`
+- Secret `GOOGLE_OAUTH_CLIENT_SECRET`
+- Secret `CRM_INTEGRATION_ENCRYPTION_KEY`
+
+The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, and Calendar event read/write. Google may require OAuth consent-screen setup and review before external users can grant Gmail access. No Google account is connected until its owner completes consent.
+
+## Mailbox boundaries and retention
+
+- Personal mailbox messages are tagged with their CRM owner and returned only to that owner.
+- Shared mailbox messages are scoped to one tenant and business unit. Only users assigned to that unit can read them; unit managers and CRM superadmins manage the connection and retention setting.
+- Gmail is read-only. New connections queue a full mailbox history import, then periodic Gmail history checks. Message bodies are stored in CRM D1; attachments up to 25 MB each are copied into the CRM R2 bucket.
+- Disconnecting a mailbox immediately clears its encrypted Google tokens and cancels pending sync work. Imported content is purged after the manager-set retention period. The Worker cron removes R2 objects before deleting their D1 references.
+- CRM Calendar reads a bounded event range. Create and update require an explicit review confirmation in the CRM and are recorded in the audit log.
+
+## Client email rules
+
+- Automatic acknowledgements are off by default and configured per business unit by its manager.
+- When enabled, only a plain receipt acknowledgement is queued to the original sender. Mailing-list and automated messages are excluded.
+- Substantive client emails enter the approval queue. The author or a unit manager may approve or reject; approvals create an idempotent delivery outbox entry.
+- Delivery remains disabled until a company mail-server adapter and its Cloudflare credentials are configured. Approval does not send mail by itself.
+
+## Remaining rollout work
+
+Before enabling Google connections, set the three Google OAuth values above and verify the registered callback URL. For sending, configure a private Cloudflare Worker Service Binding named `CRM_MAILER` to the company mail gateway, then set `CRM_EMAIL_SEND_ENABLED=true` only after its sender identities and domain verification are ready. The gateway contract is `POST /send` with `{tenantId,unitId,to,subject,text}`, an `Idempotency-Key` header, and a JSON response containing `messageId`; it owns the server-specific SMTP/API credentials. The CRM retries transient delivery failures with a bounded backoff and keeps recipient and message contents out of logs. Keep Google/Gmail and company mail-server credentials separate. Run a retention drill against a test unit before selecting the final production retention period.

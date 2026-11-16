@@ -321,6 +321,63 @@ a { color: inherit; }
   .crm-modal-head { padding: 16px 17px; }
   .crm-auth-card { padding: 27px 22px; }
 }
+.crm-google-modal { width: min(720px,calc(100vw - 28px)); max-height: min(850px,calc(100dvh - 36px)); overflow: hidden; }
+.crm-google-modal .crm-modal-head { align-items: flex-start; }
+.crm-google-modal .crm-modal-head p { max-width: 590px; line-height: 1.55; }
+.crm-google-body { display: grid; gap: 14px; overflow: auto; padding: 16px; }
+.crm-google-connect-row { display: flex; align-items: end; gap: 10px; }
+.crm-google-connect-row .crm-field { flex: 1; }
+.crm-google-hint { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.crm-google-hint code { overflow-wrap: anywhere; }
+.crm-google-list,.crm-google-calendar,.crm-email-receipt-config { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 13px; }
+.crm-google-list h3,.crm-google-calendar h3,.crm-email-receipt-config h3 { margin: 0; font-size: 13px; }
+.crm-google-item { display: flex; align-items: flex-start; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 11px; }
+.crm-google-icon { display: grid; width: 34px; height: 34px; flex: none; place-items: center; border-radius: 10px; color: #075dde; background: #eaf2ff; }
+.crm-google-retention { display: flex; align-items: end; gap: 7px; margin-top: 8px; }
+.crm-google-retention label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; }
+.crm-google-retention select { min-height: 31px; border: 1px solid var(--line); border-radius: 8px; padding: 0 7px; color: var(--ink); background: var(--surface); font-size: 11px; }
+.crm-email-receipt-toggle { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; }
+.crm-email-receipt-toggle input { width: 16px; height: 16px; accent-color: #0876f9; }
+.crm-email-receipt-toggle span { display: grid; gap: 3px; }
+.crm-email-receipt-toggle strong { font-size: 11px; }
+.crm-email-receipt-toggle small,.crm-google-calendar small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.crm-email-receipt-config textarea { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 9px; color: var(--ink); background: var(--surface); font: inherit; }
+.crm-google-calendar section { display: grid; gap: 8px; }
+.crm-google-calendar section > strong { font-size: 11px; }
+.crm-google-event { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 9px; }
+.crm-google-event > span { display: grid; gap: 3px; min-width: 0; }
+.crm-google-event > span strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-google-event-form { display: grid; gap: 9px; border: 1px solid var(--line); border-radius: 12px; padding: 11px; }
+.crm-google-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+@media (max-width: 620px) { .crm-google-connect-row { align-items: stretch; flex-direction: column; } .crm-google-item { flex-wrap: wrap; } .crm-google-item > .crm-list-content { min-width: calc(100% - 50px); } .crm-google-dates { grid-template-columns: 1fr; } .crm-google-retention { flex-wrap: wrap; } }
+.crm-email-workspace { display: grid; gap: 14px; }
+.crm-email-toolbar { display: flex; align-items: center; gap: 8px; }
+.crm-email-toolbar label { display: flex; min-width: 180px; flex: 1; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; color: var(--muted); background: var(--surface); }
+.crm-email-toolbar input { width: 100%; min-height: 38px; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; font-size: 12px; }
+.crm-email-grid { display: grid; min-height: 440px; grid-template-columns: minmax(250px,.8fr) minmax(0,1.2fr); gap: 13px; }
+.crm-email-inbox,.crm-email-reader,.crm-email-approvals { min-width: 0; padding: 15px; }
+.crm-email-list { display: grid; max-height: 580px; overflow: auto; }
+.crm-email-row { display: grid; gap: 5px; border: 0; border-bottom: 1px solid var(--line); padding: 11px 5px; color: var(--ink); background: transparent; text-align: left; cursor: pointer; }
+.crm-email-row.active { border-radius: 9px; background: var(--soft-blue); }
+.crm-email-row-top { display: flex; justify-content: space-between; gap: 9px; }
+.crm-email-row-top strong,.crm-email-row-subject { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-email-row-top small,.crm-email-row small,.crm-email-row-snippet { color: var(--muted); font-size: 10px; }
+.crm-email-row-snippet { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crm-email-reader { display: grid; align-content: start; gap: 12px; }
+.crm-email-private-badge { width: fit-content; margin: 0; border-radius: 20px; padding: 5px 9px; color: var(--muted); background: var(--soft); font-size: 10px; }
+.crm-email-body { min-height: 220px; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.crm-email-empty { display: grid; min-height: 100px; align-content: center; padding: 18px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+.crm-email-compose { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 15px; padding: 14px; background: var(--surface); }
+.crm-email-compose textarea { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 10px; color: var(--ink); background: var(--surface); font: inherit; font-size: 12px; }
+.crm-email-approvals { display: grid; gap: 10px; }
+.crm-approval-list { display: grid; gap: 9px; }
+.crm-approval-item { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 11px; padding: 11px; }
+.crm-approval-item > div:first-child { display: grid; min-width: 0; gap: 4px; }
+.crm-approval-item strong { overflow-wrap: anywhere; font-size: 12px; }
+.crm-approval-item span { color: var(--muted); font-size: 10px; }
+.crm-approval-item p { display: -webkit-box; overflow: hidden; margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.crm-approval-actions { display: flex; flex: none; align-items: center; gap: 6px; }
+@media (max-width: 740px) { .crm-email-toolbar { flex-wrap: wrap; } .crm-email-toolbar label { flex-basis: 100%; } .crm-email-grid { grid-template-columns: 1fr; } .crm-email-list { max-height: 300px; } .crm-approval-item { flex-direction: column; } .crm-approval-actions { justify-content: flex-end; } }
 
 .crm-shell[data-theme="dark"] {
   color-scheme: dark;

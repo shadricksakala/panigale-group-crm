@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const context = await crmContext(env.CRM_DB,user.id,tenantId);
     if (!context.tenant) return json({ error: "CRM workspace is not available." },403);
     const preference = await env.CRM_DB.prepare("SELECT email_reminders_enabled,timezone FROM crm_notification_preferences WHERE tenant_id=? AND user_id=?").bind(context.tenantId,user.id).first();
-    return json({ emailRemindersEnabled: Number(preference?.email_reminders_enabled || 0) === 1, timezone: String(preference?.timezone || ""), emailDeliveryReady: false });
+    return json({ emailRemindersEnabled: Number(preference?.email_reminders_enabled || 0) === 1, timezone: String(preference?.timezone || ""), emailDeliveryReady: env.CRM_EMAIL_SEND_ENABLED === "true" && Boolean(env.CRM_MAILER) });
   } catch (error) {
     if (error instanceof Response) return error;
     console.error("crm_reminder_preferences_read_failed", { name: error instanceof Error ? error.name : "unknown" });
@@ -35,7 +35,7 @@ export async function PUT(request: Request) {
     try { new Intl.DateTimeFormat("en",{timeZone:timezone}); } catch { return json({ error: "Choose a valid time zone." },400); }
     await env.CRM_DB.prepare(`INSERT INTO crm_notification_preferences(tenant_id,user_id,email_reminders_enabled,timezone) VALUES(?,?,?,?)
       ON CONFLICT(tenant_id,user_id) DO UPDATE SET email_reminders_enabled=excluded.email_reminders_enabled,timezone=excluded.timezone,updated_at=CURRENT_TIMESTAMP`).bind(context.tenantId,user.id,enabled,timezone).run();
-    return json({ emailRemindersEnabled: enabled === 1, timezone, emailDeliveryReady: false });
+    return json({ emailRemindersEnabled: enabled === 1, timezone, emailDeliveryReady: env.CRM_EMAIL_SEND_ENABLED === "true" && Boolean(env.CRM_MAILER) });
   } catch (error) {
     if (error instanceof Response) return error;
     console.error("crm_reminder_preferences_write_failed", { name: error instanceof Error ? error.name : "unknown" });
