@@ -412,6 +412,7 @@ a { color: inherit; }
 @media (max-width: 650px) {
   .crm-topbar { gap: 5px; }
   .crm-topbar .crm-select-wrap { flex: 1; }
+  .crm-topbar .crm-mobile-search-trigger { display: grid; width: 36px; height: 36px; }
   .crm-topbar .crm-theme-toggle { width: 36px; height: 36px; display: grid; }
   .crm-topbar .crm-reminder-button { width: 35px; }
   .crm-page-head { min-width: 0; }
