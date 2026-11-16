@@ -67,9 +67,20 @@ For the normal application build, use `npm run build` before either Wrangler com
 4. Apply one migration at a time and inspect the result. Do not combine migration deployment with a hostname cutover or removal of the PaniPay CRM.
 5. Verify expected schema and application behavior. Keep the captured bookmark available through the recovery window.
 
-## Backup gaps to close before removing rollback
+## Encrypted long-term D1 exports
 
-- Configure an encrypted, access-controlled long-term D1 export outside the Worker deployment if retention beyond Cloudflare Time Travel is required. This is not yet automated.
-- Establish a separate backup/restore plan for `CRM_DOCUMENTS` in R2 and rehearse it with non-production documents. No independent R2 backup has been verified.
-- Rehearse recovery in a non-production environment using synthetic or approved masked data. Current Time Travel restore is in-place; do not rehearse against the active production database.
-- Keep the PaniPay CRM rollback deployment until the standalone recovery drill, mobile verification, auth/integration checks, and tenant isolation checks are complete. Remember that the PaniPay CRM cannot restore standalone CRM writes.
+The prepared workflow in `.github/workflows/backup-d1.yml` is designed to export the production CRM D1 database once per day, encrypt the SQL dump with AES-256-GCM, upload it to the private `panigale-group-crm-backups-production` R2 bucket, read it back, and verify the authentication tag and SQL format. The bucket is currently empty. After setup, plaintext will exist only in the ephemeral GitHub runner's temporary directory and will be removed before upload. The backup key is never stored in this repository or Cloudflare Worker.
+
+Before enabling the workflow, configure these GitHub repository settings:
+
+- Secret `CLOUDFLARE_API_TOKEN`: a Cloudflare token limited to the CRM account, D1 export/read access, and read/write access to the dedicated CRM backup bucket.
+- Variable `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account ID that owns the CRM D1 database and backup bucket.
+- Secret `CRM_BACKUP_ENCRYPTION_KEY`: a canonical base64-encoded random 32-byte key. Generate it locally with `node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64')+'\\n')"`; add the output directly to GitHub and keep a separately secured recovery copy. Never paste the key into chat or commit it. Preserve the current key for every existing backup; key rotation requires retaining the old key for older exports.
+
+Run the `Encrypted CRM D1 backup` workflow manually after configuration and confirm its R2 read-back verification succeeds. Scheduled runs start only from the repository's default branch. A missing or expired GitHub Actions billing allowance will prevent scheduled backups and must be monitored as an external prerequisite.
+
+### Restore rehearsal and R2 document backups
+
+- A long-term D1 export is not a restore rehearsal. Download one encrypted object using authorized Cloudflare access, decrypt it only on a secured operator machine, and import it into a new non-production D1 database before validating migration state and representative records. Never rehearse on the active production database.
+- The CRM document bucket `CRM_DOCUMENTS` still needs a separate backup plan and a rehearsal with synthetic documents. Do not describe the D1 export workflow as covering R2 files.
+- Keep the PaniPay CRM rollback deployment until the D1 restore rehearsal, R2 document recovery, mobile verification, auth/integration checks, and tenant isolation checks are complete. Remember that the PaniPay CRM cannot restore standalone CRM writes.
