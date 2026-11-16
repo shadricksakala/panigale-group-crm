@@ -37,9 +37,15 @@ Personal Google connections request `openid`, `email`, `profile`, Gmail read-onl
 - Automatic acknowledgements are off by default and configured per business unit by its manager.
 - When enabled, only a plain receipt acknowledgement is queued to the original sender from a shared company mailbox. Personal Gmail connections never trigger automatic client email. Mailing-list and automated messages are excluded.
 - Substantive client emails enter the approval queue. The author or a unit manager may approve or reject; approvals create an idempotent delivery outbox entry.
-- Gmail connections are read-only and never act as an outbound sender. Client messages use the business unit's configured company mail service.
-- Before client-email approval is enabled, the mail gateway must expose the unit's verified sender identity to the CRM. Show that exact sender alongside the recipient, subject, and full message in the approval step; do not allow approval while the sender identity is unknown.
-- Delivery remains disabled until a company mail-server adapter and its Cloudflare credentials are configured. Approval queues an idempotent delivery; the scheduled Worker sends it only after the adapter is enabled.
+- Gmail connections are read-only and never act as an outbound sender. Ordinary client mail uses the business unit's configured company mail service; the limited support-only Cloudflare Email path is described below.
+- Before a client email can be approved, the selected provider must expose the unit and app's verified sender identity. Show that exact sender beside the recipient, subject, and full message; block approval if the sender is unknown.
+- General client mail and internal reminders remain disabled until the company mail-server adapter and its Cloudflare service binding are configured. Approval creates an idempotent outbox entry, and the scheduled Worker sends it only after the adapter is enabled.
+
+### Limited Cloudflare Email Service support senders
+
+The Worker can also use a restricted Cloudflare Email Service `send_email` binding for PaniPay and EUROZA support receipts and approved support replies. The application maps each support integration to its own allowlisted sender. This path does not send from Gmail and is not the general company mail-server adapter; reminders and ordinary composed client emails still use `CRM_MAILER`.
+
+Cloudflare Email Service requires the sender domain to be onboarded and verified. The structured Workers `send()` API does not expose an idempotency key, so native sends use an atomic outbox claim and are not automatically retried after an uncertain result. A unit manager can requeue an uncertain approved reply only after checking provider delivery records and confirming the client did not receive it; the confirmation is audited. Keep automatic receipts off by default and keep `CRM_EMAIL_SEND_ENABLED=false` until the sender domain and an end-to-end delivery flow are verified.
 
 ## Remaining rollout work
 
