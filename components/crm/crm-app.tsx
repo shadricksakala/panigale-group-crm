@@ -556,9 +556,11 @@ export function CrmApp() {
 
     <div className="crm-main">
       <header className="crm-topbar">
-        <div className="crm-select-wrap"><span>Workspace</span><select aria-label="Workspace" value={context.tenant.id} onChange={event => { setSelectedTenant(event.target.value); setSelectedUnit(""); }} disabled={context.memberships.length < 2}>{context.memberships.map(tenant => <option key={tenant.id} value={tenant.id}>{tenant.name}</option>)}</select></div>
-        <div className="crm-top-separator"/>
-        <div className="crm-select-wrap"><span>Business unit</span><select aria-label="Business unit" value={selectedUnit} onChange={event => setSelectedUnit(event.target.value)}><option value="">All my units</option>{context.units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></div>
+        <div className="crm-topbar-selectors">
+          <div className="crm-select-wrap"><span>Workspace</span><select aria-label="Workspace" value={context.tenant.id} onChange={event => { setSelectedTenant(event.target.value); setSelectedUnit(""); }} disabled={context.memberships.length < 2}>{context.memberships.map(tenant => <option key={tenant.id} value={tenant.id}>{tenant.name}</option>)}</select></div>
+          <div className="crm-top-separator"/>
+          <div className="crm-select-wrap"><span>Business unit</span><select aria-label="Business unit" value={selectedUnit} onChange={event => setSelectedUnit(event.target.value)}><option value="">All my units</option>{context.units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></div>
+        </div>
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
         <button className="crm-icon-button crm-mobile-search-trigger" title="Search CRM" aria-label="Search CRM" aria-haspopup="dialog" aria-expanded={mobileSearchOpen} onClick={()=>setMobileSearchOpen(true)}><Search size={18}/></button>

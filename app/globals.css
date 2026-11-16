@@ -53,6 +53,9 @@ a { color: inherit; }
 .crm-avatar { display: inline-grid; width: 36px; height: 36px; flex: none; place-items: center; border-radius: 50%; color: #075dde; background: #e5efff; font-size: 12px; font-weight: 750; }
 .crm-main { min-height: 100vh; margin-left: 248px; }
 .crm-topbar { position: sticky; top: 0; z-index: 20; display: flex; min-height: 76px; align-items: center; gap: 18px; border-bottom: 1px solid var(--line); padding: 12px 28px; background: #fff; }
+.crm-topbar-selectors { display: flex; min-width: 0; flex: none; align-items: center; gap: 16px; }
+.crm-topbar-selectors .crm-select-wrap { min-width: 0; width: 190px; }
+.crm-topbar-selectors .crm-select-wrap select { width: 100%; min-width: 0; max-width: 100%; }
 .crm-select-wrap { display: grid; gap: 3px; min-width: 185px; }
 .crm-select-wrap span { color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
 .crm-select-wrap select { max-width: 235px; overflow: hidden; border: 0; color: var(--ink); background: transparent; font-weight: 650; text-overflow: ellipsis; }
@@ -241,11 +244,21 @@ a { color: inherit; }
   .crm-contact-layout { grid-template-columns: minmax(0,1fr) 310px; }
 }
 
+@media (max-width: 1300px) and (min-width: 901px) {
+  .crm-topbar { gap: 12px; padding-inline: 16px; }
+  .crm-topbar-selectors { gap: 10px; }
+  .crm-topbar-selectors .crm-select-wrap { width: 155px; }
+  .crm-topbar .crm-search { min-width: 0; }
+  .crm-account-copy { display: none; }
+}
+
 @media (max-width: 900px) {
   .crm-sidebar { display: none; }
   .crm-main { margin-left: 0; padding-bottom: 74px; }
   .crm-topbar { min-height: 70px; gap: 11px; padding: 10px 15px; }
   .crm-topbar .crm-select-wrap { min-width: 0; max-width: 170px; }
+  .crm-topbar-selectors { flex: 1; gap: 10px; }
+  .crm-topbar-selectors .crm-select-wrap { width: auto; }
   .crm-topbar .crm-select-wrap span { display: none; }
   .crm-topbar .crm-select-wrap select { max-width: 160px; font-size: 11px; }
   .crm-top-separator { height: 28px; }
