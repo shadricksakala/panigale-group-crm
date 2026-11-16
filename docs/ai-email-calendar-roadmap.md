@@ -4,16 +4,13 @@
 
 Make the CRM a lively, useful relationship workspace for Panigale Group companies. It should help a teammate remember who needs attention, understand recent client communication, prepare the next step, and coordinate work across authorized business units. It links to PaniPay and other group platforms; it does not replace them.
 
-The CRM remains private by business unit by default. Personal mailbox data is private to the connecting user. A shared mailbox belongs to one tenant and one business unit. Cross-unit visibility requires an explicit CRM superadmin grant and an audit event. Never trust tenant, unit, role, or user IDs supplied by the browser as authority.
+The CRM remains private by business unit by default. Personal mailbox data is private to the connecting user. A shared mailbox belongs to one tenant and one business unit. Cross-unit sharing is not implemented; it would require a separately designed CRM superadmin grant and an audit event. Never trust tenant, unit, role, or user IDs supplied by the browser as authority.
 
 ## PaniPay AI as a starting point
 
-PaniPay has two useful patterns to carry forward:
+The inspected PaniPay implementation is its in-app Support assistant (`components/support-assistant.tsx` and `app/api/organizations/support-assistant/route.ts`). It uses Cloudflare Workers AI with an environment-selected model, verifies organization membership on the server, builds permission-filtered context, limits requests per user and organization, bounds the message history, rejects likely secrets and private-data requests, validates the response, and disables AI Gateway caching and prompt logs. Saved conversations are private to the signed-in user and organization. Its prompt is intentionally read-only and does not execute product actions.
 
-- **Support assistant:** Cloudflare Workers AI, an environment-selected model, concise product guidance, permission-filtered context, private per-user/per-organization conversations, bounded message history, rate limits, sensitive-output checks, and no prompt logging or caching.
-- **Shop assistant:** a small context-limited assistant that treats catalog data as untrusted input, does not claim to perform transactions, and returns a safe non-AI response when inference is unavailable.
-
-The CRM already follows these patterns in `app/api/ai/assistant/route.ts` and `lib/server/crm-ai.mjs`: Cloudflare Workers AI, selected-unit CRM context, a 12-request hourly limit, private conversation history, secret filtering, and human-confirmed task/note suggestions. Recent authorized email can inform summaries and follow-ups. Keep the current production feature flag off until the AI configuration and release checks are ready.
+Carry those engineering safeguards into the CRM, but use the CRM relationship assistant as the product starting point. The CRM implementation in `app/api/ai/assistant/route.ts` and `lib/server/crm-ai.mjs` already scopes context to an authorized business unit, limits usage, stores per-user/per-unit history, filters secrets, and returns proposed tasks or notes for human confirmation. Extend that foundation for relationship summaries, meeting briefs, and email follow-up drafts. Never reuse PaniPay's payment-support prompt or expose payment-system data in CRM context. Imported emails and CRM notes remain untrusted input; every data lookup must be re-authorized server-side for the current user and unit. Keep the production feature flag off until model configuration, privacy behavior, and release checks are verified.
 
 ## Feature plan
 
@@ -67,14 +64,33 @@ The CRM already follows these patterns in `app/api/ai/assistant/route.ts` and `l
 
 ## Delivery sequence
 
-1. **Foundation and review:** confirm data classification, consent copy, access matrix, retention periods, notification preferences, and audit events. Review existing migrations and endpoints before enabling integrations.
-2. **Internal CRM usefulness:** ship due/overdue reminders, personal task preferences, and the permission-scoped assistant for CRM records. Keep all AI-generated changes confirm-before-save.
-3. **Personal Google connections:** validate OAuth consent, encrypted token storage, sync progress/errors, revoke, retention purge, and personal mailbox isolation in a non-production environment.
-4. **Unit shared inbox:** add manager setup, shared inbox review, record matching, unit-scoped access, retention controls, and audit visibility.
-5. **Calendar workflow:** complete mobile event views and confirmed create/update with permission and audit checks.
-6. **Outbound email:** configure the mail-server adapter, internal reminders, automatic receipt acknowledgements, then the human approval queue for client emails. Keep substantive client mail approval mandatory.
-7. **Controlled AI expansion:** add meeting briefs and reviewed draft generation, evaluate output quality and source attribution, then consider automation only with explicit policies and kill switches.
-8. **Production readiness:** configure secrets and bindings, backup/restore and retention drills, monitoring/alerts, mobile checks, access-isolation checks, rollback, and health verification before enabling flags or cutting over production.
+1. **Policy and data boundaries:** confirm mailbox consent, record/data classification, unit access matrix, retention periods, user notification preferences, and audit events. Keep personal Gmail private to its owner and assign each shared mailbox to one unit. Treat cross-unit sharing as a separate future feature requiring an explicit superadmin grant model. Review existing migrations/endpoints and preserve the production D1 data.
+2. **CRM assistant and reminders:** improve the existing unit-scoped assistant for relationship questions, timeline summaries, and follow-up suggestions; ship due/overdue reminders and user time-zone preferences. Every task/note/reminder suggestion stays a draft until confirmed. Add source links/dates to summaries and never let the model trigger writes or sends.
+3. **Personal Gmail and Calendar:** verify OAuth consent, least-privilege scopes, encrypted token storage, sync status, disconnect/revoke, retention purge, and owner-only mailbox access in non-production. Add bounded calendar views and reviewed event changes with audit records.
+4. **Shared inbox operations:** let authorized managers connect a group mailbox to one unit, set monitored scope/retention, review matched and unmatched mail, and route a shared message to a uniquely matched record owner or configured unit fallback. Keep internal notifications minimal and audited.
+5. **Internal email and reminders:** connect the company mail-server adapter for opted-in CRM reminders. Resolve recipients only from an assigned CRM owner/manager or explicit relationship, show the resolved destination, deduplicate deliveries, and record delivery outcomes.
+6. **Client email controls:** when enabled by an authorized manager, allow a plain receipt acknowledgement to the original sender from a shared mailbox, with loop and auto-generated-message protections. Require human approval for every substantive client email; show recipient, sender mailbox, subject, full body, related record, and approver. AI may draft but cannot approve or send.
+7. **Production readiness and staged rollout:** configure secrets/bindings, backup/restore and retention drills, monitoring/alerts, mobile checks, unit/tenant isolation checks, rollback, and health verification. Enable each integration per unit/feature flag only after its checks pass; keep the PaniPay CRM as rollback until the standalone deployment is verified.
+
+## PaniPay patterns to reuse
+
+- Use the Cloudflare Workers AI binding and model setting from the server environment; never put model credentials in browser code.
+- Authenticate and authorize before building prompt context. Query only the active tenant/unit and the current user's permitted mailbox scope.
+- Rate-limit by tenant and user; bound request size, history, retrieved rows, and output length.
+- Treat imported email, notes, and CRM fields as untrusted prompt content. Do not follow instructions embedded in them.
+- Filter credentials from input/context/output, disable AI Gateway caching and prompt collection, and log only error class/request metadata.
+- Keep the assistant read-only. Parse structured suggestions against known CRM record IDs and allowlist fields; require a user confirmation endpoint for each write.
+- Provide a clear unavailable response if inference is disabled or fails. AI must not block the CRM's ordinary reminder, mail, or calendar workflows.
+
+## Initial acceptance checks
+
+- A user cannot retrieve another tenant's or unauthorized unit's records, messages, conversations, or suggestions by changing request IDs.
+- Personal Gmail content is visible only to its owner; shared inbox content is limited to members of its assigned unit.
+- AI summaries cite CRM records/messages and dates, distinguish known facts from suggestions, and do not invent missing details.
+- AI-generated notes, tasks, reminders, calendar changes, and client messages remain unsaved/unsent until a user completes the relevant confirmation or approval flow.
+- Internal reminders honor opt-in, configured time zone, recipient rules, deduplication, and retry behavior.
+- Automatic receipt responses are disabled by default and limited to eligible shared-mailbox messages; substantive client email always awaits approval.
+- OAuth disconnect, retention expiry, audit logging, provider failure, and rollback behavior are verified before enabling production integrations.
 
 ## Release gates and operating rules
 

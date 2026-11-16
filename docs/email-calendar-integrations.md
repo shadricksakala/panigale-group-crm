@@ -17,7 +17,7 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 ## Mailbox boundaries and retention
 
 - Personal mailbox messages are tagged with their CRM owner and returned only to that owner.
-- Shared mailbox messages are scoped to one tenant and business unit. Only users assigned to that unit can read them; unit managers and CRM superadmins manage the connection and retention setting.
+- A shared Gmail address can be active in only one business unit per tenant. OAuth completion checks this and D1 insert/update triggers enforce it under concurrent requests. Messages are scoped to that unit; only users assigned there can read them. Unit managers and CRM superadmins manage the connection and retention setting. Cross-unit sharing requires a separately designed, explicit superadmin grant with audit coverage; reconnecting the same address in multiple units is not a sharing mechanism.
 - Inbox page reads are audit logged with the unit, result count, pagination offset, and mailbox scopes involved. Search terms, addresses, subjects, and message bodies are not copied into the audit event.
 - Gmail is read-only. New connections queue a full mailbox history import, then periodic Gmail history checks. Message bodies are stored in CRM D1; attachments up to 25 MB each are copied into the CRM R2 bucket.
 - The first history import never auto-replies to or routes old mail. Only eligible inbox messages received at or after the mailbox connection time can trigger shared-mail automation. The original Gmail history cursor is preserved through import so mail arriving during the backfill is picked up by incremental sync.
@@ -41,3 +41,15 @@ The requested Google scopes are `openid`, `email`, `profile`, Gmail read-only, a
 ## Remaining rollout work
 
 Before enabling Google connections, set the three Google OAuth values above and verify the registered callback URL. For sending, configure a private Cloudflare Worker Service Binding named `CRM_MAILER` to the company mail gateway, then set `CRM_EMAIL_SEND_ENABLED=true` only after its sender identities and domain verification are ready. The gateway contract is `POST /send` with `{tenantId,unitId,to,subject,text}`, an `Idempotency-Key` header, and a JSON response containing `messageId`; it owns the server-specific SMTP/API credentials. The CRM retries transient delivery failures with a bounded backoff and keeps recipient and message contents out of logs. Keep Google/Gmail and company mail-server credentials separate. Run a retention drill against a test unit before selecting the final production retention period.
+
+Before applying migration `0014_shared_mailbox_unit_guard.sql` to an existing database, run this read-only audit for active shared mailbox addresses assigned to multiple units within the same tenant:
+
+```sql
+SELECT tenant_id, lower(email) AS email, COUNT(DISTINCT unit_id) AS unit_count
+FROM crm_google_connections
+WHERE connection_scope='shared' AND status='active'
+GROUP BY tenant_id, lower(email)
+HAVING COUNT(DISTINCT unit_id)>1;
+```
+
+Resolve any returned rows through an approved owner/superadmin review before relying on the one-unit invariant; do not delete imported messages or connection data as an automatic migration step.
