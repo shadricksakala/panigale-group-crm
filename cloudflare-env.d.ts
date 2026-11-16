@@ -14,6 +14,7 @@ interface CloudflareEnv {
   CRM_READ_ONLY_MODE?: string;
   CRM_SCHEDULED_JOBS_ENABLED?: string;
   CRM_MAILER?: Fetcher;
+  CRM_EMAIL?: { send(message: { from: { email: string; name?: string }; to: string; subject: string; text: string }): Promise<unknown> };
   AI?: Ai;
 }
 

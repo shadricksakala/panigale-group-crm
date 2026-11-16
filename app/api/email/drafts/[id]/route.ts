@@ -37,11 +37,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const audit = env.CRM_DB.prepare("INSERT INTO crm_audit_events(id,tenant_id,unit_id,actor_user_id,action,entity_type,entity_id,metadata_json) VALUES(?,?,?,?,?,'email_draft',?,?)")
       .bind(crypto.randomUUID(), context.tenantId, draft.unit_id, user.id, approved ? "crm.email.approved" : "crm.email.rejected", id, JSON.stringify({ deliveryQueued: approved, ...(senderEmail ? { senderEmail } : {}) }));
     if (approved) {
-      await env.CRM_DB.batch([
+      const statements = [
         env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='queued',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id, context.tenantId, id),
         env.CRM_DB.prepare("INSERT OR IGNORE INTO crm_client_email_outbox(id,tenant_id,unit_id,draft_id,recipient_email,subject,body_text,idempotency_key,status) VALUES(?,?,?,?,?,?,?,?,'queued')").bind(crypto.randomUUID(), context.tenantId, draft.unit_id, id, draft.recipient_email, draft.subject, draft.body_text, `crm-client-email:${id}`),
         audit,
-      ]);
+      ];
+      if (draft.support_message_id) statements.push(env.CRM_DB.prepare("UPDATE crm_support_messages SET visibility='public' WHERE id=? AND tenant_id=? AND unit_id=?").bind(draft.support_message_id, context.tenantId, draft.unit_id));
+      await env.CRM_DB.batch(statements);
     } else {
       await env.CRM_DB.batch([
         env.CRM_DB.prepare("UPDATE crm_email_drafts SET status='rejected',approved_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE tenant_id=? AND id=? AND status='pending_approval'").bind(user.id, context.tenantId, id),

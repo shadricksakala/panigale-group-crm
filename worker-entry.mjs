@@ -1,7 +1,7 @@
 import application from "./dist/server/index.js";
 import { purgeDisconnectedGoogleMail, queueCrmReminderEmails } from "./lib/server/crm-reminders.mjs";
 import { processGoogleMailSync } from "./lib/server/gmail-sync.mjs";
-import { deliverCrmEmailOutbox } from "./lib/server/mail-delivery.mjs";
+import { deliverCrmEmailOutbox, deliverCrmSupportOutbox } from "./lib/server/mail-delivery.mjs";
 
 export default {
   async fetch(request, env, ctx) {
@@ -36,5 +36,8 @@ export default {
     ctx.waitUntil(deliverCrmEmailOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
       if(result.attempted)console.info("crm_mail_delivery_scan_completed",result);
     }).catch(error=>console.error("crm_mail_delivery_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
+    ctx.waitUntil(deliverCrmSupportOutbox(env.CRM_DB,env.CRM_MAILER,env.CRM_EMAIL,env.CRM_EMAIL_SEND_ENABLED,controller.scheduledTime).then(result=>{
+      if(result.attempted)console.info("crm_support_mail_delivery_scan_completed",result);
+    }).catch(error=>console.error("crm_support_mail_delivery_scan_failed",{name:error instanceof Error?error.name:"unknown"})));
   },
 };

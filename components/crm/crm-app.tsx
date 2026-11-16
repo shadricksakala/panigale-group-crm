@@ -4,7 +4,7 @@ import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState
 import {
   Activity, Archive, ArrowDownRight, ArrowRight, Bell, BriefcaseBusiness, Building2, CalendarDays,
   Check, CheckSquare2, ChevronDown, CircleDollarSign, ClipboardList, Clock3, ContactRound,
-  Download, ExternalLink, FileText, Filter, Handshake, Home, LayoutGrid, LoaderCircle, LockKeyhole,
+  Download, ExternalLink, FileText, Filter, Handshake, Headphones, Home, LayoutGrid, LoaderCircle, LockKeyhole,
   LogOut, Mail, MoreHorizontal, Moon, Paperclip, Pencil, Phone, Plus, Search, Send, Settings2, Sun,
   ShieldCheck, Sparkles, Target, TrendingUp, Users, WalletCards, X,
 } from "lucide-react";
@@ -15,9 +15,10 @@ import { ApiError, getJson, secureForm, secureJson } from "../../lib/client/api"
 import { CrmAssistant, GoogleConnections, ReminderEmailSettings } from "./crm-assistant";
 import { PaniPayConnections, PaniPayInvoiceActions } from "./panipay-connections";
 import { EmailView } from "./email-view";
+import { SupportView } from "./support-view";
 
 type Row = Record<string, string | number | boolean | null | undefined> & { id: string };
-type Module = "overview" | "contacts" | "pipeline" | "projects" | "tasks" | "email" | "proposals" | "documents" | "invoices" | "reports" | "access";
+type Module = "overview" | "contacts" | "pipeline" | "projects" | "tasks" | "email" | "support" | "proposals" | "documents" | "invoices" | "reports" | "access";
 type User = { id: string; name: string; email: string };
 type Unit = { id: string; name: string; slug: string; category: string; website?: string | null; accent?: string; can_view_financials?: number };
 type Tenant = { id: string; name: string; slug: string; role: string };
@@ -33,6 +34,7 @@ const nav: { id: Module; label: string; icon: typeof Home }[] = [
   { id: "projects", label: "Projects", icon: BriefcaseBusiness },
   { id: "tasks", label: "Tasks", icon: CheckSquare2 },
   { id: "email", label: "Email", icon: Mail },
+  { id: "support", label: "Support", icon: Headphones },
   { id: "proposals", label: "Proposals", icon: FileText },
   { id: "documents", label: "Documents", icon: Paperclip },
   { id: "invoices", label: "Invoices", icon: WalletCards },
@@ -500,6 +502,7 @@ export function CrmApp() {
     projects: ["Projects", "Coordinate engagement delivery, milestones, and client outcomes."],
     tasks: ["Tasks", "Keep calls, meetings, and next steps on track."],
     email: ["Email", "Review connected mail and manage client email approvals."],
+    support: ["Support", "Client conversations, connected."],
     proposals: ["Proposals", "Create, share, and track scopes and quotations."],
     documents: ["Documents", "Keep client and project files organized with unit scoped access."],
     invoices: ["Invoices", "Track receivables and record payments alongside your work."],
@@ -574,6 +577,7 @@ export function CrmApp() {
 
         {module === "overview" && <OverviewView data={data} currentUserId={context.user.id} stageRows={stageRows} pipeline={openPipelineMinor} activeProjects={activeProjects} dueTasks={dueTasks} outstanding={outstandingMinor} canSeeFinancials={canSeeFinancials} onNavigate={setActiveModule} onSelectTask={() => setActiveModule("tasks")}/>}
         {module === "email" && <EmailView tenantId={context.tenant.id} unitId={currentUnit?.id||""} searchTerm={search}/>}
+        {module === "support" && <SupportView tenantId={context.tenant.id} unitId={selectedUnit} units={context.units} members={data.members} searchTerm={search} canManage={isSuperadmin||context.role==="unit_manager"} currentUserId={context.user.id}/>}
         {module === "contacts" && <ContactsView mode={contactMode} setMode={setContactMode} companies={visibleCompanies} contacts={visibleContacts} rows={shownContacts} allCompanies={data.companies.length} onCreate={openCreate} onImportCsv={()=>setCsvTarget("contacts")} onSelect={(row, kind) => { setDetail(row); setDetailType(kind); }} search={search}/>}
         {module === "pipeline" && <PipelineView leads={visibleLeads} stages={allStages} units={context.units} canSeeFinancials={canSeeFinancials} onCreate={() => openCreate("leads")} onImportCsv={()=>setCsvTarget("leads")} onEdit={row=>openEdit("leads",row)} onUpdate={(row, stage) => void update("leads", row, { stage })} onSelect={row => { setDetail(row); setDetailType("lead"); }} busy={busy}/>}
         {module === "projects" && <ProjectsView projects={visibleProjects} projectMembers={data.projectMembers} members={data.members} canManageTeam={isSuperadmin||context.role==="unit_manager"} busy={busy} onSaveTeam={saveProjectTeam} milestones={data.milestones} deliverables={data.deliverables} risks={data.projectRisks} activities={data.activities} selected={detailType === "project" ? detail : null} onSelect={row => { setDetail(row); setDetailType("project"); }} onClear={() => { setDetail(null); setDetailType(null); }} onCreate={openCreate} onEdit={row=>openEdit("projects",row)} onEditRisk={row=>openEdit("project_risks",row)} onUpdate={(row, status) => void update("projects", row, { status })} onUpdateRisk={(row,status)=>void update("project_risks",row,{status})} onArchiveRisk={row=>void archive("project_risks",row)} onMilestoneStatus={(row,status)=>void update("milestones",row,{status})} onDeliverableStatus={(row,status)=>void update("deliverables",row,{status})}/>}
