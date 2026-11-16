@@ -1,10 +1,72 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { CheckCircle2, Globe, LockKeyhole, Moon, Paperclip, Send, Shield, ShieldCheck, Sparkles, Sun, Users, Zap } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, Globe, LockKeyhole, Moon, Paperclip, Send, Shield, ShieldCheck, Sparkles, Sun, Users, Zap } from "lucide-react";
 
 type Portal = { service: string; unitName: string; categories: string[] };
 type Theme = "light" | "dark";
+type Language = "en" | "fr" | "it";
+
+const copy = {
+  en: {
+    clientSupport: "Client support", groupEyebrow: "PANIGALE GROUP SUPPORT", eurozaEyebrow: "EUROZA · CLIENT CARE", panipayEyebrow: "PANIPAY · CUSTOMER CARE",
+    received: "We’ve received your request.", eurozaTitle: "How can EUROZA help?", title: "How can we help?", receivedDetail: "Your request is with the right team. We’ll continue the conversation by email.",
+    eurozaIntro: "Tell us about your application, compliance, project, or service request. Our team will take it from here.", intro: "Tell us what you need and we’ll get your message to the right team.",
+    requestSent: "Request sent successfully", referenceNumber: "Your reference number is", keepReference: "Keep this number handy. We’ll reply to the email address you provided.", anotherRequest: "Send another request",
+    eurozaUnit: "EUROZA Consulting · Compliance · Project delivery", groupUnit: "Panigale Group business unit", secure: "Secure", name: "Your name", email: "Email address", topic: "What can we help with?", selectTopic: "Select a topic", reference: "Reference", optional: "(optional)",
+    panipayReference: "Payment, invoice, or escrow reference", eurozaReference: "Application or project reference", subject: "Subject", subjectPlaceholder: "A short summary of your request", message: "Message", messagePlaceholder: "Share the details we’ll need to help you…",
+    fullName: "Your full name", consentEuroza: "We’ll use your details only to respond to your EUROZA request and keep the conversation connected.", consent: "We’ll use your details to respond to this request and keep the conversation connected.",
+    shareDocument: "Need to share a document?", shareDocumentDetail: "Add your ticket number if you need to share a document later.", send: "Send request", private: "Your request is only visible to the relevant support team.",
+    next: "What happens next", route: "We route your request", routeDetail: "Your message goes to the right product and team.", ticketNumber: "You receive a ticket number", ticketDetail: "Your request stays connected to a reference number.",
+    byEmail: "Continue by email", byEmailDetail: "Reply directly when you need to add more information.", common: "Common requests", permit: "Permit and application support", permitDetail: "Application status, required documents or permit guidance",
+    compliance: "Compliance and project support", complianceDetail: "Statutory compliance, delivery, or service concerns", payment: "Payment and invoice help", paymentDetail: "Payment status, invoice questions or escrow issues",
+    account: "Account and technical help", accountDetail: "Wallet, account access, API or webhooks", clearPath: "A clear path to resolution", oneTeam: "One team, clear follow-through", caseDetail: "Your case stays connected from the first message to resolution.",
+    confidential: "Secure and confidential support", secureSupport: "Secure support", eurozaBrand: "EUROZA · Client care", panipayBrand: "PaniPay customer care", groupBrand: "Panigale Group",
+    languageName: "English", dark: "Dark", light: "Light", switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode", error: "Support is temporarily unavailable.", sendError: "Unable to send your request. Please try again.",
+  },
+  fr: {
+    clientSupport: "Assistance client", groupEyebrow: "ASSISTANCE PANIGALE GROUP", eurozaEyebrow: "EUROZA · SERVICE CLIENT", panipayEyebrow: "PANIPAY · SERVICE CLIENT",
+    received: "Votre demande a bien été reçue.", eurozaTitle: "Comment EUROZA peut-elle vous aider ?", title: "Comment pouvons-nous vous aider ?", receivedDetail: "Votre demande est transmise à la bonne équipe. Nous poursuivrons par e-mail.",
+    eurozaIntro: "Décrivez votre demande concernant une démarche, la conformité, un projet ou un service. Notre équipe prend le relais.", intro: "Dites-nous ce dont vous avez besoin afin que nous transmettions votre message à la bonne équipe.",
+    requestSent: "Demande envoyée", referenceNumber: "Votre numéro de référence", keepReference: "Conservez ce numéro. Nous répondrons à l’adresse e-mail indiquée.", anotherRequest: "Envoyer une autre demande",
+    eurozaUnit: "EUROZA Conseil · Conformité · Gestion de projets", groupUnit: "Entité du groupe Panigale", secure: "Sécurisé", name: "Votre nom", email: "Adresse e-mail", topic: "Comment pouvons-nous vous aider ?", selectTopic: "Choisissez un sujet", reference: "Référence", optional: "(facultatif)",
+    panipayReference: "Référence de paiement, facture ou séquestre", eurozaReference: "Référence de dossier ou de projet", subject: "Objet", subjectPlaceholder: "Résumez brièvement votre demande", message: "Message", messagePlaceholder: "Indiquez les détails nécessaires pour vous aider…",
+    fullName: "Votre nom complet", consentEuroza: "Vos coordonnées serviront uniquement à répondre à votre demande EUROZA et à suivre l’échange.", consent: "Vos coordonnées serviront à répondre à votre demande et à assurer le suivi de l’échange.",
+    shareDocument: "Vous souhaitez transmettre un document ?", shareDocumentDetail: "Indiquez votre numéro de ticket pour joindre un document ultérieurement.", send: "Envoyer la demande", private: "Votre demande est visible uniquement par l’équipe concernée.",
+    next: "Que se passe-t-il ensuite ?", route: "Votre demande est transmise", routeDetail: "Votre message est envoyé au bon produit et à la bonne équipe.", ticketNumber: "Vous recevez un numéro de ticket", ticketDetail: "Votre demande reste liée à un numéro de référence.",
+    byEmail: "Poursuivez par e-mail", byEmailDetail: "Répondez directement pour ajouter des informations.", common: "Demandes fréquentes", permit: "Démarches et permis", permitDetail: "Suivi de dossier, pièces requises ou conseils sur les permis",
+    compliance: "Conformité et projets", complianceDetail: "Conformité réglementaire, livraison ou questions de service", payment: "Paiements et factures", paymentDetail: "Statut d’un paiement, facture ou question de séquestre",
+    account: "Compte et assistance technique", accountDetail: "Portefeuille, accès au compte, API ou webhooks", clearPath: "Un suivi clair jusqu’à la résolution", oneTeam: "Une équipe, un suivi continu", caseDetail: "Votre dossier reste suivi du premier message jusqu’à sa résolution.",
+    confidential: "Assistance sécurisée et confidentielle", secureSupport: "Assistance sécurisée", eurozaBrand: "EUROZA · Service client", panipayBrand: "Service client PaniPay", groupBrand: "Panigale Group",
+    languageName: "Français", dark: "Sombre", light: "Clair", switchToDark: "Activer le mode sombre", switchToLight: "Activer le mode clair", error: "Le service d’assistance est momentanément indisponible.", sendError: "Impossible d’envoyer votre demande. Veuillez réessayer.",
+  },
+  it: {
+    clientSupport: "Assistenza clienti", groupEyebrow: "ASSISTENZA PANIGALE GROUP", eurozaEyebrow: "EUROZA · ASSISTENZA CLIENTI", panipayEyebrow: "PANIPAY · ASSISTENZA CLIENTI",
+    received: "Abbiamo ricevuto la tua richiesta.", eurozaTitle: "Come può aiutarti EUROZA?", title: "Come possiamo aiutarti?", receivedDetail: "La tua richiesta è stata inoltrata al team corretto. Continueremo la conversazione via e-mail.",
+    eurozaIntro: "Descrivi la tua richiesta relativa a pratiche, conformità, progetti o servizi. Il nostro team ti assisterà.", intro: "Dicci di cosa hai bisogno e inoltreremo il messaggio al team corretto.",
+    requestSent: "Richiesta inviata", referenceNumber: "Il tuo numero di riferimento", keepReference: "Conserva questo numero. Risponderemo all’indirizzo e-mail indicato.", anotherRequest: "Invia un’altra richiesta",
+    eurozaUnit: "EUROZA Consulenza · Conformità · Progetti", groupUnit: "Società del gruppo Panigale", secure: "Protetto", name: "Nome", email: "Indirizzo e-mail", topic: "Come possiamo aiutarti?", selectTopic: "Seleziona un argomento", reference: "Riferimento", optional: "(facoltativo)",
+    panipayReference: "Riferimento pagamento, fattura o escrow", eurozaReference: "Riferimento pratica o progetto", subject: "Oggetto", subjectPlaceholder: "Un breve riepilogo della richiesta", message: "Messaggio", messagePlaceholder: "Inserisci i dettagli utili per poterti aiutare…",
+    fullName: "Nome e cognome", consentEuroza: "Useremo i tuoi dati solo per rispondere alla richiesta EUROZA e mantenere la conversazione collegata.", consent: "Useremo i tuoi dati per rispondere alla richiesta e mantenere la conversazione collegata.",
+    shareDocument: "Devi inviare un documento?", shareDocumentDetail: "Aggiungi il numero del ticket se desideri inviare un documento in seguito.", send: "Invia richiesta", private: "La richiesta è visibile solo al team di assistenza interessato.",
+    next: "Cosa succede ora", route: "Inoltriamo la richiesta", routeDetail: "Il messaggio arriva al prodotto e al team corretti.", ticketNumber: "Ricevi un numero di ticket", ticketDetail: "La richiesta resta collegata a un numero di riferimento.",
+    byEmail: "Continua via e-mail", byEmailDetail: "Rispondi direttamente per aggiungere altre informazioni.", common: "Richieste frequenti", permit: "Pratiche e permessi", permitDetail: "Stato della pratica, documenti richiesti o indicazioni sui permessi",
+    compliance: "Conformità e progetti", complianceDetail: "Conformità normativa, consegne o richieste sui servizi", payment: "Pagamenti e fatture", paymentDetail: "Stato del pagamento, fatture o questioni escrow",
+    account: "Account e assistenza tecnica", accountDetail: "Wallet, accesso account, API o webhook", clearPath: "Un percorso chiaro verso la soluzione", oneTeam: "Un team, un seguito costante", caseDetail: "La pratica resta collegata dal primo messaggio fino alla risoluzione.",
+    confidential: "Assistenza sicura e riservata", secureSupport: "Assistenza sicura", eurozaBrand: "EUROZA · Assistenza clienti", panipayBrand: "Assistenza clienti PaniPay", groupBrand: "Panigale Group",
+    languageName: "Italiano", dark: "Scuro", light: "Chiaro", switchToDark: "Attiva la modalità scura", switchToLight: "Attiva la modalità chiara", error: "Il servizio di assistenza non è momentaneamente disponibile.", sendError: "Impossibile inviare la richiesta. Riprova.",
+  },
+} satisfies Record<Language, Record<string, string>>;
+
+const categoryCopy: Record<Language, Record<string, string>> = {
+  en: {},
+  fr: {
+    "Permit or application": "Démarches ou permis", "Tax or statutory registration": "Fiscalité ou immatriculation légale", "Compliance support": "Assistance en conformité", "Project delivery": "Réalisation de projet", "Billing or service concern": "Facturation ou question sur un service", "Payment or invoice": "Paiement ou facture", "Failed payment": "Échec de paiement", "Wallet or payout": "Portefeuille ou retrait", "Escrow dispute": "Litige lié au séquestre", "Account access": "Accès au compte", "API or webhook": "API ou webhook", Other: "Autre",
+  },
+  it: {
+    "Permit or application": "Pratica o permesso", "Tax or statutory registration": "Registrazione fiscale o legale", "Compliance support": "Assistenza normativa", "Project delivery": "Realizzazione del progetto", "Billing or service concern": "Fatturazione o richiesta sul servizio", "Payment or invoice": "Pagamento o fattura", "Failed payment": "Pagamento non riuscito", "Wallet or payout": "Wallet o prelievo", "Escrow dispute": "Contestazione escrow", "Account access": "Accesso all’account", "API or webhook": "API o webhook", Other: "Altro",
+  },
+};
 
 export function SupportPortal({ portalSlug }: { portalSlug: string }) {
   const [portal, setPortal] = useState<Portal | null>(null);
@@ -12,25 +74,42 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
   const [error, setError] = useState("");
   const [ticket, setTicket] = useState("");
   const [theme, setTheme] = useState<Theme>("light");
+  const [language, setLanguage] = useState<Language>("en");
+  const [languageOpen, setLanguageOpen] = useState(false);
   const panipay = portalSlug === "panipay";
   const euroza = portalSlug === "euroza";
+  const c = copy[language];
 
   useEffect(() => {
     const saved = window.localStorage.getItem("pg-support-theme");
     setTheme(saved === "dark" || saved === "light" ? saved : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const savedLanguage = window.localStorage.getItem("pg-support-language");
+    const browserLanguage = navigator.languages.find(value => value.startsWith("fr") || value.startsWith("it"))?.slice(0, 2);
+    const initialLanguage = savedLanguage === "fr" || savedLanguage === "it" || savedLanguage === "en" ? savedLanguage : browserLanguage === "fr" || browserLanguage === "it" ? browserLanguage : "en";
+    setLanguage(initialLanguage);
     fetch(`/api/support/v1/tickets?portal=${encodeURIComponent(portalSlug)}`, { cache: "no-store" })
       .then(async response => {
         const data = await response.json() as Portal & { error?: string };
         if (!response.ok) throw new Error(data.error || "Support is unavailable.");
         setPortal(data);
       })
-      .catch(reason => setError(reason instanceof Error ? reason.message : "Support is unavailable."));
+      .catch(() => setError("unavailable"));
   }, [portalSlug]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    window.localStorage.setItem("pg-support-language", language);
+  }, [language]);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
     window.localStorage.setItem("pg-support-theme", next);
+  }
+
+  function changeLanguage(next: Language) {
+    setLanguage(next);
+    setLanguageOpen(false);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -46,11 +125,11 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
         body: JSON.stringify({ portalSlug, customerName: form.get("name"), customerEmail: form.get("email"), category: form.get("category"), reference: form.get("reference"), subject: form.get("subject"), message: form.get("message"), website: form.get("website") }),
       });
       const data = await response.json() as { ticketNumber?: string; error?: string };
-      if (!response.ok) throw new Error(data.error || "Unable to send request.");
+      if (!response.ok) throw new Error("support-submit-failed");
       setTicket(data.ticketNumber || "");
       formElement.reset();
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Unable to send your request.");
+    } catch {
+      setError(c.sendError);
     } finally {
       setBusy(false);
     }
@@ -58,69 +137,77 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
 
   const serviceName = portal?.service || (euroza ? "EUROZA" : panipay ? "PaniPay" : "Client support");
   const brandName = euroza ? "EUROZA" : panipay ? "PaniPay" : "Panigale Group";
+  const brandCaption = euroza ? c.eurozaBrand : panipay ? c.panipayBrand : c.groupBrand;
+  const eyebrow = euroza ? c.eurozaEyebrow : panipay ? c.panipayEyebrow : c.groupEyebrow;
+  const unitName = euroza && portal?.unitName === "Euroza Consultancy" ? c.eurozaUnit : portal?.unitName || (euroza ? c.eurozaUnit : c.groupUnit);
 
-  return <main className="support-portal" data-theme={theme} data-brand={euroza ? "euroza" : panipay ? "panipay" : "group"}>
+  return <main className="support-portal" lang={language} data-theme={theme} data-brand={euroza ? "euroza" : panipay ? "panipay" : "group"}>
     <header className="support-portal-header">
       <a className={`support-portal-brand${euroza ? " euroza" : ""}`} href={euroza ? "https://euroza.panigale.tech" : panipay ? "https://panipay.panigale.tech" : "https://panigale.tech"} aria-label={`${brandName} support`}>
         {euroza ? <span className="support-euroza-logo-wrap"><img src="/brands/euroza-logo.png" alt="EUROZA Consulting"/></span> : <span className="support-portal-mark">{panipay ? "P" : "P"}</span>}
-        <span className="support-brand-caption">{euroza ? "Client care" : panipay ? "PaniPay" : "Panigale Group"}</span>
+        <span className="support-brand-caption">{brandCaption}</span>
       </a>
-      <div className="support-portal-header-side"><span>Client support</span><i/>
-        <button type="button" className="support-language-button" aria-label="Language: English"><Globe size={15}/>English</button>
-        <button type="button" className="support-theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-pressed={theme === "dark"}>
-          {theme === "dark" ? <Sun size={15}/> : <Moon size={15}/>}<span>{theme === "dark" ? "Light" : "Dark"}</span>
+      <div className="support-portal-header-side"><span>{c.clientSupport}</span><i/>
+        <div className="support-language-picker" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setLanguageOpen(false); }}>
+          <button type="button" className="support-language-button" aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen(open => !open)}><Globe size={15}/>{c.languageName}<ChevronDown size={13}/></button>
+          {languageOpen && <div className="support-language-menu" role="menu" aria-label="Choose language">
+            {([ ["en", "English"], ["fr", "Français"], ["it", "Italiano"] ] as const).map(([value, label]) => <button type="button" role="menuitemradio" aria-checked={language === value} key={value} onClick={() => changeLanguage(value)}>{label}{language === value && <Check size={14}/>}</button>)}
+          </div>}
+        </div>
+        <button type="button" className="support-theme-toggle" onClick={toggleTheme} aria-label={theme === "dark" ? c.switchToLight : c.switchToDark} aria-pressed={theme === "dark"}>
+          {theme === "dark" ? <Sun size={15}/> : <Moon size={15}/>}<span>{theme === "dark" ? c.light : c.dark}</span>
         </button>
       </div>
     </header>
 
     <section className="support-portal-hero">
-      <span className="support-portal-eyebrow"><Sparkles size={14}/>{euroza ? "EUROZA · CLIENT CARE" : panipay ? "PANIPAY · CUSTOMER CARE" : "PANIGALE GROUP SUPPORT"}</span>
-      <h1>{ticket ? "We’ve received your request." : euroza ? "How can EUROZA help?" : "How can we help?"}</h1>
-      <p>{ticket ? "Your request is with the right team. We’ll continue the conversation by email." : euroza ? "Tell us about your application, compliance, project, or service request. Our team will take it from here." : "Tell us what you need and we’ll get your message to the right team."}</p>
+      <span className="support-portal-eyebrow"><Sparkles size={14}/>{eyebrow}</span>
+      <h1>{ticket ? c.received : euroza ? c.eurozaTitle : c.title}</h1>
+      <p>{ticket ? c.receivedDetail : euroza ? c.eurozaIntro : c.intro}</p>
     </section>
 
     {ticket ? <section className="support-portal-success">
-      <span><CheckCircle2 size={28}/></span><h2>Request sent successfully</h2><p>Your reference number is</p><strong>{ticket}</strong>
-      <small>Keep this number handy. We’ll reply to <b>the email address you provided</b>.</small>
-      <a href={`/support/${portalSlug}`}>Send another request</a>
+      <span><CheckCircle2 size={28}/></span><h2>{c.requestSent}</h2><p>{c.referenceNumber}</p><strong>{ticket}</strong>
+      <small>{c.keepReference}</small>
+      <a href={`/support/${portalSlug}`}>{c.anotherRequest}</a>
     </section> : <section className="support-portal-layout">
       <form className="support-portal-form" onSubmit={event => void submit(event)}>
         <div className="support-portal-unit">
           <span className="support-service-mark">{panipay ? "P" : euroza ? "E" : "P"}</span>
-          <div><strong>{serviceName}</strong><span>{portal?.unitName || (euroza ? "Consultancy · Compliance · Project delivery" : "Panigale Group business unit")}</span></div>
-          <span className="support-portal-lock"><LockKeyhole size={13}/>Secure</span>
+          <div><strong>{serviceName}</strong><span>{unitName}</span></div>
+          <span className="support-portal-lock"><LockKeyhole size={13}/>{c.secure}</span>
         </div>
-        {error && <div className="support-portal-error" role="alert">{error}</div>}
+        {error && <div className="support-portal-error" role="alert">{error === "unavailable" ? c.error : error}</div>}
         <div className="support-portal-fields">
-          <label><b>Your name <em>*</em></b><input required name="name" autoComplete="name" placeholder="Your full name"/></label>
-          <label><b>Email address <em>*</em></b><input required type="email" name="email" autoComplete="email" placeholder="you@example.com"/></label>
-          <label><b>What can we help with? <em>*</em></b><select required name="category" defaultValue=""><option value="" disabled>Select a topic</option>{(portal?.categories || []).map(value => <option key={value}>{value}</option>)}</select></label>
-          <label><b>Reference <span>(optional)</span></b><input name="reference" placeholder={panipay ? "Payment, invoice, or escrow reference" : "Application or project reference"}/></label>
-          <label className="span-two"><b>Subject <em>*</em></b><input required name="subject" maxLength={250} placeholder="A short summary of your request"/></label>
-          <label className="span-two"><b>Message <em>*</em></b><textarea required name="message" minLength={10} maxLength={10000} rows={6} placeholder="Share the details we’ll need to help you…"/></label>
+          <label><b>{c.name} <em>*</em></b><input required name="name" autoComplete="name" placeholder={c.fullName}/></label>
+          <label><b>{c.email} <em>*</em></b><input required type="email" name="email" autoComplete="email" placeholder="you@example.com"/></label>
+          <label><b>{c.topic} <em>*</em></b><select required name="category" defaultValue=""><option value="" disabled>{c.selectTopic}</option>{(portal?.categories || []).map(value => <option key={value} value={value}>{categoryCopy[language][value] || value}</option>)}</select></label>
+          <label><b>{c.reference} <span>{c.optional}</span></b><input name="reference" placeholder={panipay ? c.panipayReference : c.eurozaReference}/></label>
+          <label className="span-two"><b>{c.subject} <em>*</em></b><input required name="subject" maxLength={250} placeholder={c.subjectPlaceholder}/></label>
+          <label className="span-two"><b>{c.message} <em>*</em></b><textarea required name="message" minLength={10} maxLength={10000} rows={6} placeholder={c.messagePlaceholder}/></label>
           <label className="support-honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off"/></label>
         </div>
-        <div className="support-portal-upload"><Paperclip size={16}/><span><strong>Need to share a document?</strong><small>Add your ticket number if you need to share a document later.</small></span><CheckCircle2 size={16}/></div>
-        <p className="support-portal-consent"><ShieldCheck size={15}/>{euroza ? "We’ll use your details only to respond to your EUROZA request and keep the conversation connected." : "We’ll use your details to respond to this request and keep the conversation connected."}</p>
-        <button className="support-portal-submit" disabled={busy || !portal}>{busy ? <span className="support-portal-spinner"/> : <Send size={15}/>}Send request</button>
-        <p className="support-portal-private"><LockKeyhole size={12}/>Your request is only visible to the relevant support team.</p>
+        <div className="support-portal-upload"><Paperclip size={16}/><span><strong>{c.shareDocument}</strong><small>{c.shareDocumentDetail}</small></span><CheckCircle2 size={16}/></div>
+        <p className="support-portal-consent"><ShieldCheck size={15}/>{euroza ? c.consentEuroza : c.consent}</p>
+        <button className="support-portal-submit" disabled={busy || !portal}>{busy ? <span className="support-portal-spinner"/> : <Send size={15}/>}<span>{c.send}</span></button>
+        <p className="support-portal-private"><LockKeyhole size={12}/>{c.private}</p>
       </form>
 
       <aside className="support-portal-aside">
-        <section><h2>What happens next</h2><ol>
-          <li><b>01</b><span><strong>We route your request</strong><small>Your message goes to the right product and team.</small></span></li>
-          <li><b>02</b><span><strong>You receive a ticket number</strong><small>Your request stays connected to a reference number.</small></span></li>
-          <li><b>03</b><span><strong>Continue by email</strong><small>Reply directly when you need to add more information.</small></span></li>
+        <section><h2>{c.next}</h2><ol>
+          <li><b>01</b><span><strong>{c.route}</strong><small>{c.routeDetail}</small></span></li>
+          <li><b>02</b><span><strong>{c.ticketNumber}</strong><small>{c.ticketDetail}</small></span></li>
+          <li><b>03</b><span><strong>{c.byEmail}</strong><small>{c.byEmailDetail}</small></span></li>
         </ol></section>
-        <section className="support-portal-shortcuts"><h2>Common requests</h2>
-          <article><span className="support-shortcut-icon blue"><Shield size={16}/></span><span><strong>{panipay ? "Payment and invoice help" : "Permit and application support"}</strong><small>{panipay ? "Payment status, invoice questions or escrow issues" : "Application status, required documents or permit guidance"}</small></span></article>
-          <article><span className="support-shortcut-icon purple"><Users size={16}/></span><span><strong>{panipay ? "Account and technical help" : "Compliance and project support"}</strong><small>{panipay ? "Wallet, account access, API or webhooks" : "Statutory compliance, delivery, or service concerns"}</small></span></article>
-          <div className="support-portal-note"><Zap size={16}/><span><strong>{euroza ? "A clear path to resolution" : "One team, clear follow-through"}</strong><small>Your case stays connected from the first message to resolution.</small></span></div>
+        <section className="support-portal-shortcuts"><h2>{c.common}</h2>
+          <article><span className="support-shortcut-icon blue"><Shield size={16}/></span><span><strong>{panipay ? c.payment : c.permit}</strong><small>{panipay ? c.paymentDetail : c.permitDetail}</small></span></article>
+          <article><span className="support-shortcut-icon purple"><Users size={16}/></span><span><strong>{panipay ? c.account : c.compliance}</strong><small>{panipay ? c.accountDetail : c.complianceDetail}</small></span></article>
+          <div className="support-portal-note"><Zap size={16}/><span><strong>{euroza ? c.clearPath : c.oneTeam}</strong><small>{c.caseDetail}</small></span></div>
         </section>
-        <footer><ShieldCheck size={14}/> Secure and confidential support</footer>
+        <footer><ShieldCheck size={14}/>{c.confidential}</footer>
       </aside>
     </section>}
 
-    <footer className="support-portal-footer"><span>© {brandName}</span><span>Secure support · {serviceName}</span></footer>
+    <footer className="support-portal-footer"><span>© {brandName}</span><span>{c.secureSupport} · {serviceName}</span></footer>
   </main>;
 }
