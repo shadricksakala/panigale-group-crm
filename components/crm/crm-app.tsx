@@ -5,7 +5,7 @@ import {
   Activity, Archive, ArrowDownRight, ArrowRight, Bell, BriefcaseBusiness, Building2, CalendarDays,
   Check, CheckSquare2, ChevronDown, CircleDollarSign, ClipboardList, Clock3, ContactRound,
   Download, ExternalLink, FileText, Filter, Handshake, Home, LayoutGrid, LoaderCircle, LockKeyhole,
-  LogOut, Mail, MoreHorizontal, Paperclip, Pencil, Phone, Plus, Search, Send, Settings2,
+  LogOut, Mail, MoreHorizontal, Moon, Paperclip, Pencil, Phone, Plus, Search, Send, Settings2, Sun,
   ShieldCheck, Sparkles, Target, TrendingUp, Users, WalletCards, X,
 } from "lucide-react";
 import {
@@ -100,7 +100,7 @@ function ActivityState({ item }: { item: Row }) {
   return <span className={`crm-pill ${tone}`}>{titleCase(label)}</span>;
 }
 function Brand() {
-  return <a className="crm-brand" href="/crm"><img src="/panigale-wordmark.png" alt="Panigale Group" style={{width:138,height:"auto",objectFit:"contain"}}/><span className="crm-brand-name"><span>CRM</span></span></a>;
+  return <a className="crm-brand" href="/crm"><img src="/panigale-crm-logo-transparent.png" alt="Panigale Group CRM"/></a>;
 }
 
 const baseFields: Record<string, Field[]> = {
@@ -200,6 +200,7 @@ const baseFields: Record<string, Field[]> = {
 
 export function CrmApp() {
   const [module, setModule] = useState<Module>("overview");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [context, setContext] = useState<Context | null>(null);
   const [selectedTenant, setSelectedTenant] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
@@ -224,6 +225,21 @@ export function CrmApp() {
   const [stageManagerOpen,setStageManagerOpen]=useState(false);
   const searchInput=useRef<HTMLInputElement>(null);
   const mobileSearchInput=useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try {
+      const savedTheme = window.localStorage.getItem("panigale-crm-theme");
+      if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
+    } catch { /* Use the light theme when browser storage is unavailable. */ }
+  }, []);
+
+  useEffect(() => {
+    try { window.localStorage.setItem("panigale-crm-theme", theme); } catch { /* The theme still applies for this session. */ }
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme(value => value === "light" ? "dark" : "light");
+  }
 
   const suffix = useMemo(() => queryString(selectedTenant || context?.tenant?.id || "", selectedUnit), [selectedTenant, context?.tenant?.id, selectedUnit]);
   const isSuperadmin = context?.role === "superadmin";
@@ -471,7 +487,7 @@ export function CrmApp() {
   const visibleDocuments = queryMatch(data.documents, ["filename", "company_name", "project_name", "content_type"]);
   const visibleInvoices = queryMatch(data.invoices, ["title", "company_name", "external_reference", "status"]);
 
-  return <div className="crm-shell">
+  return <div className="crm-shell" data-theme={theme}>
     <aside className="crm-sidebar">
       <Brand/>
       <nav className="crm-nav" aria-label="CRM sections">{nav.filter(item => item.id !== "access" || canManageAccess).map(item => { const Icon = item.icon; return <button key={item.id} className={`crm-nav-button ${selectedNav(item.id) ? "active" : ""}`} onClick={() => setActiveModule(item.id)}><Icon/><span>{item.label}</span>{item.id === "tasks" && dueTasks > 0 && <span className="crm-pill gold" style={{ marginLeft: "auto" }}>{dueTasks}</span>}</button>; })}</nav>
@@ -486,6 +502,7 @@ export function CrmApp() {
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
         <button className="crm-icon-button crm-mobile-search-trigger" title="Search CRM" aria-label="Search CRM" aria-haspopup="dialog" aria-expanded={mobileSearchOpen} onClick={()=>setMobileSearchOpen(true)}><Search size={18}/></button>
+        <button className="crm-icon-button crm-theme-toggle" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`} onClick={toggleTheme}>{theme === "light" ? <Moon size={18}/> : <Sun size={18}/>}</button>
         <div className="crm-reminder-wrap"><button className="crm-icon-button crm-reminder-button" title="Task reminders" aria-label={`Task reminders${dueTasks?`, ${dueTasks} due`:""}`} aria-haspopup="dialog" aria-expanded={remindersOpen} onClick={()=>setRemindersOpen(value=>!value)}><Bell size={18}/>{dueTasks>0&&<span className="crm-reminder-count">{dueTasks>99?"99+":dueTasks}</span>}</button>{remindersOpen&&<section className="crm-reminder-panel" role="dialog" aria-label="Task reminders"><div className="crm-card-head"><div><h2>Task reminders</h2><p>{taskReminders.length?`${dueTasks} overdue or due in 7 days${dueTasks>taskReminders.length?" · showing 20":""}`:"All caught up"}</p></div><button className="crm-icon-button" aria-label="Close reminders" onClick={()=>setRemindersOpen(false)}><X size={15}/></button></div>{taskReminders.length?taskReminders.map(task=>{const date=String(task.due_at).slice(0,10),today=new Date().toISOString().slice(0,10),overdue=date<today;return <button className="crm-reminder-item" key={task.id} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}><span className={`crm-metric-icon ${overdue?"tone-red":"tone-gold"}`}><Clock3 size={15}/></span><span className="crm-list-content"><strong>{task.title}</strong><span>{task.company_name||task.contact_name||task.project_name||titleCase(task.kind)} · {task.owner_name||"Unassigned"}</span></span><span className={`crm-pill ${overdue?"red":"gold"}`}>{overdue?"Overdue":date===today?"Today":fmtDate(date)}</span></button>;}):<p className="crm-reminder-empty">No open tasks are due this week.</p>}<button className="crm-panel-link" style={{width:"100%",justifyContent:"center",marginTop:8}} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}>View all tasks <ArrowRight size={14}/></button></section>}</div>
         <div className="crm-account"><span className="crm-avatar">{initials(context.user.name)}</span><span className="crm-account-copy"><strong style={{ fontSize: 12 }}>{context.user.name}</strong><small style={{ color: "var(--muted)", fontSize: 10 }}>{currentUnit?.name || "Panigale Group"}</small></span><ChevronDown size={14}/></div>
       </header>
@@ -511,7 +528,7 @@ export function CrmApp() {
     </div>
 
     <nav className="crm-bottom-nav" aria-label="Mobile CRM sections">{(["overview", "contacts", "pipeline", "tasks"] as Module[]).map(id => { const item = nav.find(entry => entry.id === id)!; const Icon = item.icon; return <button key={id} className={`crm-bottom-button ${module === id ? "active" : ""}`} onClick={() => setActiveModule(id)}><Icon/><span>{id === "overview" ? "Home" : item.label}</span></button>; })}<button className={`crm-bottom-button ${moreOpen ? "active" : ""}`} onClick={() => setMoreOpen(true)}><MoreHorizontal/><span>More</span></button></nav>
-    {moreOpen && <div className="crm-mobile-more" onClick={() => setMoreOpen(false)}><section className="crm-mobile-more-panel" onClick={event => event.stopPropagation()}><div className="crm-card-head"><div><h2>More from your workspace</h2><p>{context.tenant.name} · {currentUnit?.name || "All units"}</p></div><button className="crm-icon-button" onClick={() => setMoreOpen(false)}><X size={17}/></button></div><nav>{nav.filter(item => !["overview", "contacts", "pipeline", "tasks", "access"].includes(item.id)).concat(canManageAccess ? [nav.find(item => item.id === "access")!] : []).map(item => { const Icon = item.icon; return <button key={item.id} className={module === item.id ? "active" : ""} onClick={() => setActiveModule(item.id)}><Icon size={20}/>{item.label}</button>; })}</nav><button className="crm-secondary" style={{ width: "100%", marginTop: 13 }} onClick={() => void signOut()}><LogOut size={15}/>Sign out</button></section></div>}
+    {moreOpen && <div className="crm-mobile-more" onClick={() => setMoreOpen(false)}><section className="crm-mobile-more-panel" onClick={event => event.stopPropagation()}><div className="crm-card-head"><div><h2>More from your workspace</h2><p>{context.tenant.name} · {currentUnit?.name || "All units"}</p></div><button className="crm-icon-button" onClick={() => setMoreOpen(false)}><X size={17}/></button></div><nav>{nav.filter(item => !["overview", "contacts", "pipeline", "tasks", "access"].includes(item.id)).concat(canManageAccess ? [nav.find(item => item.id === "access")!] : []).map(item => { const Icon = item.icon; return <button key={item.id} className={module === item.id ? "active" : ""} onClick={() => setActiveModule(item.id)}><Icon size={20}/>{item.label}</button>; })}</nav><button className="crm-secondary crm-mobile-theme-toggle" style={{ width: "100%", marginTop: 13 }} onClick={toggleTheme}>{theme === "light" ? <Moon size={15}/> : <Sun size={15}/>}Switch to {theme === "light" ? "dark" : "light"} mode</button><button className="crm-secondary" style={{ width: "100%", marginTop: 8 }} onClick={() => void signOut()}><LogOut size={15}/>Sign out</button></section></div>}
 
     {detail && detailType === "contact" && <ContactDrawer row={detail} activities={data.activities} companies={data.companies} onEdit={row=>openEdit("contacts",row)} onFollowUp={row=>openCreate("activities",row)} mobileClose={() => { setDetail(null); setDetailType(null); }}/>}
     {detail && detailType === "company" && <CompanyDrawer row={detail} contacts={data.contacts} leads={data.leads} projects={data.projects} proposals={data.proposals} invoices={data.invoices} financialUnitIds={context.units.filter(unit=>isSuperadmin||unit.can_view_financials===1).map(unit=>unit.id)} activities={data.activities} onEdit={row=>openEdit("companies",row)} onFollowUp={row=>openCreate("activities",row)} mobileClose={() => { setDetail(null); setDetailType(null); }}/>}
