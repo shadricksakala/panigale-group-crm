@@ -34,6 +34,8 @@ Carry those engineering safeguards into the CRM, but use the CRM relationship as
 - Send optional internal reminders through a notification adapter (email first, later other channels), with per-user opt-in, an editable IANA time zone, local morning delivery, deduplication, retries, and an audit trail.
 - AI may propose a reminder from a communication; the recipient and due date must be shown and confirmed before creation.
 
+The scheduled email path now queues reminders only when the company email feature and mail service are available. Immediately before delivery it rechecks that the task is still open, assigned to the same active user/unit, within the due or day-before window in that user’s time zone, and that the user’s email reminder preference is still enabled. It refreshes the current task title/address in the queued message and fails stale rows closed.
+
 ### 3. Personal Gmail connections
 
 - Each user connects their own Google account through OAuth consent. Read-only Gmail access is used to bring relevant communication into the CRM and link it to CRM records.
