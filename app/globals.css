@@ -44,7 +44,9 @@ a { color: inherit; }
 .crm-brand-mark { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; color: white; background: linear-gradient(135deg, #0866f5 10%, #2684ff 65%, #e7ac28 66%); font-size: 21px; font-weight: 900; }
 .crm-brand-name { font-size: 18px; font-weight: 750; letter-spacing: -.04em; }
 .crm-brand-name span { color: #92baff; font-weight: 550; }
-.crm-nav { display: grid; gap: 5px; }
+.crm-nav { display: grid; flex: 1 1 auto; align-content: start; gap: 5px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #526987 transparent; scrollbar-width: thin; }
+.crm-nav::-webkit-scrollbar { width: 6px; }
+.crm-nav::-webkit-scrollbar-thumb { border-radius: 99px; background: #526987; }
 .crm-nav-button { display: flex; min-height: 46px; align-items: center; gap: 13px; border: 0; border-radius: 11px; padding: 0 14px; color: #d6e0f0; background: transparent; text-align: left; transition: background .16s ease, color .16s ease; }
 .crm-nav-button:hover { color: white; background: #ffffff14; }
 .crm-nav-button.active { color: white; background: var(--blue); box-shadow: 0 7px 17px #0064e82e; font-weight: 650; }
@@ -60,6 +62,7 @@ a { color: inherit; }
 .crm-select-wrap { display: grid; gap: 3px; min-width: 185px; }
 .crm-select-wrap span { color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
 .crm-select-wrap select { max-width: 235px; overflow: hidden; border: 0; color: var(--ink); background: transparent; font-weight: 650; text-overflow: ellipsis; }
+.crm-shell[data-theme="dark"] select option { color: #172236; background: #fff; }
 .crm-top-separator { width: 1px; height: 36px; background: var(--line); }
 .crm-search { display: flex; min-width: 180px; max-width: 460px; height: 42px; flex: 1; align-items: center; gap: 10px; border: 1px solid #e5eaf2; border-radius: 11px; padding: 0 13px; color: #8490a6; background: #fbfcfe; }
 .crm-search input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
@@ -646,3 +649,45 @@ a { color: inherit; }
 .support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success>strong{background:#1c3528;color:#b1d39c}
 .support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success a{color:#a3c98e}
 @media(max-width:520px){.support-portal-header-side{gap:5px}.support-theme-toggle{padding:0 6px!important}.support-theme-toggle span{font-size:10px}.support-euroza-logo-wrap{width:84px;height:40px}.support-euroza-logo-wrap img{width:84px;height:40px}.support-brand-caption{margin-left:7px}}
+
+/* EUROZA dark mode: warm forest surfaces and softer gold-green contrast */
+.support-portal[data-theme="dark"][data-brand="euroza"]{background:#121815;color:#e9ece4}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-header,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-footer{border-color:#344037;background:#1a211d;color:#aeb8ab}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-brand{color:#f0eee4}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-header-side{color:#b8c0b4}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-header-side i{background:#3a463c}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-header-side button{color:#c8cec3}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-header-side button:hover{background:#29332c}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-theme-toggle{border-color:#485449!important;color:#dfdfd2!important}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-hero{border-block:1px solid #343b2e;background:linear-gradient(112deg,#1b2a21 0%,#20271f 56%,#29271d 100%)}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-eyebrow{color:#c8b36d}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-hero h1{color:#f2efe4}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-hero p{color:#c0c6b8}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-form,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside>section,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success{border-color:#354238;background:#1c2520;box-shadow:0 10px 28px #080d0a35}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-unit{border-color:#354238}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-unit strong,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside h2,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success h2{color:#edece2}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-unit>div span,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields label{color:#c2cbbf}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-lock{color:#aab88f}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-service-mark{background:#29382c;color:#c5c582}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields input,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields select,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields textarea{border-color:#3b4a3e;background:#151d18;color:#eef0e7}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields input::placeholder,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields textarea::placeholder{color:#939f90}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields select option{background:#1b241e;color:#eef0e7}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields input:focus,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields select:focus,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-fields textarea:focus{border-color:#98aa74;box-shadow:0 0 0 3px #c2b15c24}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-upload{border-color:#485647;color:#b4c0a3}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-upload strong{color:#d0d4c5}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-upload small,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-consent,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-private{color:#aeb9ac}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-consent svg{color:#c4b46f}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-submit{background:linear-gradient(100deg,#55764c,#6b8150);box-shadow:0 6px 16px #0a100c55;color:#fffdf3}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside li>b{background:#303a2d;color:#d2c279}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside li strong,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-shortcuts article strong{color:#e1e4d9}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside li small,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-shortcuts article small{color:#aeb9ad}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-shortcuts article{border-color:#354238}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-shortcut-icon.blue{background:#29362d;color:#b3c48c}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-shortcut-icon.purple{background:#302d29;color:#d1bd82}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-note{background:#303326;color:#cabb7c}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-note strong{color:#e1d6a4}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-note small,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-aside footer{color:#b5b9a5}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success>span{background:#283a2e;color:#8fbe8e}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success p,.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success small{color:#b7c0b2}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success>strong{background:#303a2d;color:#e0d196}
+.support-portal[data-theme="dark"][data-brand="euroza"] .support-portal-success a{color:#d2bd73}
