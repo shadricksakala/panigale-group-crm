@@ -475,9 +475,19 @@ export function CrmApp({ initialModule = "overview" }: { initialModule?: Module 
   function setActiveModule(next: Module) {
     setModule(next); setSearch(""); setDetail(null); setDetailType(null); setMoreOpen(false);
     const target = next === "ai" ? "/crm/ai" : "/crm";
-    if (window.location.pathname !== target) window.history.pushState({}, "", `${target}${window.location.search}`);
+    const query = new URLSearchParams();
+    const tenantId = selectedTenant || context?.tenant?.id;
+    if (tenantId) query.set("tenantId", tenantId);
+    if (selectedUnit) query.set("unitId", selectedUnit);
+    const suffix = query.size ? `?${query}` : "";
+    if (window.location.pathname !== target || window.location.search !== suffix) window.history.pushState({}, "", `${target}${suffix}`);
   }
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tenantId = params.get("tenantId");
+    const unitId = params.get("unitId");
+    if (tenantId) setSelectedTenant(tenantId);
+    if (unitId) setSelectedUnit(unitId);
     const syncRoute = () => setModule(window.location.pathname === "/crm/ai" ? "ai" : "overview");
     window.addEventListener("popstate", syncRoute);
     return () => window.removeEventListener("popstate", syncRoute);
