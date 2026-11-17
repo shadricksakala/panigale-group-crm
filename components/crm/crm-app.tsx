@@ -18,7 +18,7 @@ import { EmailView } from "./email-view";
 import { SupportView } from "./support-view";
 
 type Row = Record<string, string | number | boolean | null | undefined> & { id: string };
-type Module = "overview" | "contacts" | "pipeline" | "projects" | "tasks" | "email" | "support" | "proposals" | "documents" | "invoices" | "reports" | "access";
+type Module = "overview" | "contacts" | "pipeline" | "projects" | "tasks" | "email" | "support" | "proposals" | "documents" | "invoices" | "reports" | "access" | "ai";
 type User = { id: string; name: string; email: string };
 type Unit = { id: string; name: string; slug: string; category: string; website?: string | null; accent?: string; can_view_financials?: number };
 type Tenant = { id: string; name: string; slug: string; role: string };
@@ -34,6 +34,7 @@ const nav: { id: Module; label: string; icon: typeof Home }[] = [
   { id: "projects", label: "Projects", icon: BriefcaseBusiness },
   { id: "tasks", label: "Tasks", icon: CheckSquare2 },
   { id: "email", label: "Email", icon: Mail },
+  { id: "ai", label: "AI Workspace", icon: Sparkles },
   { id: "support", label: "Support", icon: Headphones },
   { id: "proposals", label: "Proposals", icon: FileText },
   { id: "documents", label: "Documents", icon: Paperclip },
@@ -204,8 +205,8 @@ const baseFields: Record<string, Field[]> = {
   ],
 };
 
-export function CrmApp() {
-  const [module, setModule] = useState<Module>("overview");
+export function CrmApp({ initialModule = "overview" }: { initialModule?: Module }) {
+  const [module, setModule] = useState<Module>(initialModule);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [themeReady, setThemeReady] = useState(false);
   const [context, setContext] = useState<Context | null>(null);
@@ -473,7 +474,14 @@ export function CrmApp() {
   }
   function setActiveModule(next: Module) {
     setModule(next); setSearch(""); setDetail(null); setDetailType(null); setMoreOpen(false);
+    const target = next === "ai" ? "/crm/ai" : "/crm";
+    if (window.location.pathname !== target) window.history.pushState({}, "", `${target}${window.location.search}`);
   }
+  useEffect(() => {
+    const syncRoute = () => setModule(window.location.pathname === "/crm/ai" ? "ai" : "overview");
+    window.addEventListener("popstate", syncRoute);
+    return () => window.removeEventListener("popstate", syncRoute);
+  }, []);
   function openAssistantSource(source: { id: string; type: string; label: string }) {
     const separator = source.id.indexOf(":");
     const kind = separator < 0 ? "" : source.id.slice(0,separator);
@@ -508,6 +516,7 @@ export function CrmApp() {
     invoices: ["Invoices", "Track receivables and record payments alongside your work."],
     reports: ["Reports", "Understand pipeline, delivery, and collection performance."],
     access: ["Team access", "Manage who can see each business unit."],
+    ai: ["AI Workspace", "A private assistant for relationship context, follow-ups, email, and calendar work."],
   };
   const [pageTitle, pageSubtitle] = pageTitles[module];
   const mainAction = module === "contacts" ? ["companies", "Add organization"] : module === "pipeline" ? ["leads", "New opportunity"] : module === "projects" ? ["projects", "New project"] : module === "tasks" ? ["activities", "Add task"] : module === "proposals" ? ["proposals", "New proposal"] : module === "invoices" ? ["invoices", "New invoice"] : null;
@@ -564,7 +573,7 @@ export function CrmApp() {
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
         <button className="crm-icon-button crm-mobile-search-trigger" title="Search CRM" aria-label="Search CRM" aria-haspopup="dialog" aria-expanded={mobileSearchOpen} onClick={()=>setMobileSearchOpen(true)}><Search size={18}/></button>
-        <CrmAssistant tenantId={context.tenant.id} unitId={selectedUnit || (context.units.length === 1 ? context.units[0].id : "")} unitName={currentUnit?.name || "Panigale Group"} onOpenSource={openAssistantSource}/>
+        <CrmAssistant tenantId={context.tenant.id} unitId={selectedUnit || (context.units.length === 1 ? context.units[0].id : "")} unitName={currentUnit?.name || "Panigale Group"} units={context.units} reminders={taskReminders} expanded={module === "ai"} onExpand={() => setActiveModule("ai")} onExitWorkspace={() => setActiveModule("overview")} onOpenEmail={() => setActiveModule("email")} onOpenTasks={() => setActiveModule("tasks")} onOpenSource={openAssistantSource}/>
         <button className="crm-icon-button crm-theme-toggle" title={`Switch to ${theme === "light" ? "dark" : "light"} mode`} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`} onClick={toggleTheme}>{theme === "light" ? <Moon size={18}/> : <Sun size={18}/>}</button>
         <div className="crm-reminder-wrap"><button className="crm-icon-button crm-reminder-button" title="My task reminders" aria-label={`My task reminders${myDueTasks?`, ${myDueTasks} due`:""}`} aria-haspopup="dialog" aria-expanded={remindersOpen} onClick={()=>setRemindersOpen(value=>!value)}><Bell size={18}/>{myDueTasks>0&&<span className="crm-reminder-count">{myDueTasks>99?"99+":myDueTasks}</span>}</button>{remindersOpen&&<section className="crm-reminder-panel" role="dialog" aria-label="My task reminders"><div className="crm-card-head"><div><h2>My task reminders</h2><p>{taskReminders.length?`${myDueTasks} overdue or due in 7 days${myDueTasks>taskReminders.length?" · showing 20":""}`:"All caught up"}</p></div><button className="crm-icon-button" aria-label="Close reminders" onClick={()=>setRemindersOpen(false)}><X size={15}/></button></div>{taskReminders.length?taskReminders.map(task=>{const date=String(task.due_at).slice(0,10),overdue=date<localTodayKey;return <button className="crm-reminder-item" key={task.id} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}><span className={`crm-metric-icon ${overdue?"tone-red":"tone-gold"}`}><Clock3 size={15}/></span><span className="crm-list-content"><strong>{task.title}</strong><span>{task.company_name||task.contact_name||task.project_name||titleCase(task.kind)}</span></span><span className={`crm-pill ${overdue?"red":"gold"}`}>{overdue?"Overdue":date===localTodayKey?"Today":fmtDate(date)}</span></button>;}):<p className="crm-reminder-empty">No tasks assigned to you are due this week.</p>}<ReminderEmailSettings tenantId={context.tenant.id}/><GoogleConnections tenantId={context.tenant.id} unitId={currentUnit?.id||""} units={context.units}/><button className="crm-panel-link" style={{width:"100%",justifyContent:"center",marginTop:8}} onClick={()=>{setRemindersOpen(false);setActiveModule("tasks");}}>View all tasks <ArrowRight size={14}/></button></section>}</div>
         <div className="crm-account"><span className="crm-avatar">{initials(context.user.name)}</span><span className="crm-account-copy"><strong style={{ fontSize: 12 }}>{context.user.name}</strong><small style={{ color: "var(--muted)", fontSize: 10 }}>{currentUnit?.name || "Panigale Group"}</small></span><ChevronDown size={14}/></div>
@@ -572,10 +581,10 @@ export function CrmApp() {
 
       {mobileSearchOpen&&<div className="crm-mobile-search-overlay" onClick={event=>{if(event.target===event.currentTarget)setMobileSearchOpen(false);}}><section className="crm-mobile-search-panel" role="dialog" aria-modal="true" aria-label="Search CRM"><label className="crm-mobile-search-field"><Search size={19}/><input ref={mobileSearchInput} aria-label="Search CRM records" placeholder={searchPlaceholder} value={search} onChange={event=>setSearch(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")setMobileSearchOpen(false);}}/><button className="crm-icon-button" aria-label="Close search" onClick={()=>setMobileSearchOpen(false)}><X size={17}/></button></label><p>Searching {pageTitle.toLowerCase()} in {currentUnit?.name||"all assigned units"}</p></section></div>}
 
-      <main className="crm-content">
+      <main className={`crm-content ${module === "ai" ? "crm-content-ai" : ""}`}>
         {error && <div role="alert" className="crm-alert" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>{error}<button aria-label="Dismiss" onClick={() => setError("")}><X size={15}/></button></div>}
         {notice && <div role="status" className="crm-notice" style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>{notice}<button aria-label="Dismiss" onClick={() => setNotice("")}><X size={15}/></button></div>}
-        <div className="crm-page-head"><div><p className="crm-eyebrow">{currentUnit?.name || "Panigale Group"}</p><h1>{module === "overview" ? `Good morning, ${context.user.name.split(" ")[0]}` : pageTitle}</h1><p>{module === "overview" ? "Here’s what’s happening across your customer relationships today." : pageSubtitle}</p></div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"flex-end",gap:8}}>{productHref&&<a className="crm-secondary" href={productHref} target="_blank" rel="noopener noreferrer" aria-label={`Open ${currentUnit?.name} product`}><ExternalLink size={15}/>Open product</a>}{module==="pipeline"&&(isSuperadmin||context.role==="unit_manager")&&<button className="crm-secondary" onClick={()=>setStageManagerOpen(true)}><Settings2 size={16}/>Manage stages</button>}{visibleMainAction && <button className="crm-primary" onClick={() => openCreate(visibleMainAction[0])}><Plus size={17}/>{visibleMainAction[1]}</button>}</div></div>
+        {module !== "ai" && <div className="crm-page-head"><div><p className="crm-eyebrow">{currentUnit?.name || "Panigale Group"}</p><h1>{module === "overview" ? `Good morning, ${context.user.name.split(" ")[0]}` : pageTitle}</h1><p>{module === "overview" ? "Here’s what’s happening across your customer relationships today." : pageSubtitle}</p></div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"flex-end",gap:8}}>{productHref&&<a className="crm-secondary" href={productHref} target="_blank" rel="noopener noreferrer" aria-label={`Open ${currentUnit?.name} product`}><ExternalLink size={15}/>Open product</a>}{module==="pipeline"&&(isSuperadmin||context.role==="unit_manager")&&<button className="crm-secondary" onClick={()=>setStageManagerOpen(true)}><Settings2 size={16}/>Manage stages</button>}{visibleMainAction && <button className="crm-primary" onClick={() => openCreate(visibleMainAction[0])}><Plus size={17}/>{visibleMainAction[1]}</button>}</div></div>}
 
         {module === "overview" && <OverviewView data={data} currentUserId={context.user.id} stageRows={stageRows} pipeline={openPipelineMinor} activeProjects={activeProjects} dueTasks={dueTasks} outstanding={outstandingMinor} canSeeFinancials={canSeeFinancials} onNavigate={setActiveModule} onSelectTask={() => setActiveModule("tasks")}/>}
         {module === "email" && <EmailView tenantId={context.tenant.id} unitId={currentUnit?.id||""} searchTerm={search}/>}

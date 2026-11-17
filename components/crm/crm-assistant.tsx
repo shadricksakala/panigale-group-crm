@@ -1,14 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Check, LoaderCircle, Mail, Send, Sparkles, X } from "lucide-react";
+import { CalendarDays, Check, LoaderCircle, Mail, Maximize2, Send, Sparkles, X } from "lucide-react";
 import { ApiError, getJson, secureJson } from "../../lib/client/api";
 
 type Message = { id?: string; role: "user" | "assistant"; content: string; sources?: AssistantSource[] };
 type Suggestion = { id: string; kind: "task" | "note"; title: string; details?: string; dueAt?: string | null; linkType?: string | null; linkId?: string | null };
 type AssistantSource = { id: string; type: string; label: string; date: string | null };
 
-export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { tenantId: string; unitId: string; unitName: string; onOpenSource: (source: AssistantSource) => void }) {
+export function CrmAssistant({ tenantId, unitId, unitName, units, expanded, reminders = [], onExpand, onExitWorkspace, onOpenEmail, onOpenTasks, onOpenSource }: { tenantId: string; unitId: string; unitName: string; units: {id:string;name:string}[]; expanded: boolean; reminders?: {id:string;title?:unknown;due_at?:unknown;company_name?:unknown;contact_name?:unknown}[]; onExpand:()=>void; onExitWorkspace:()=>void; onOpenEmail:()=>void; onOpenTasks:()=>void; onOpenSource: (source: AssistantSource) => void }) {
   const [open,setOpen] = useState(false);
   const [messages,setMessages] = useState<Message[]>([]);
   const [suggestions,setSuggestions] = useState<Suggestion[]>([]);
@@ -19,9 +19,10 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
   const [available,setAvailable] = useState(false);
   const [error,setError] = useState("");
   const scopeKey = `${tenantId}:${unitId}`;
+  const visible = open || expanded;
 
   useEffect(() => {
-    if (!open || !unitId) return;
+    if (!visible || !unitId) return;
     let cancelled = false;
     setLoading(true); setError("");
     getJson<{ conversation: { id: string } | null; messages: (Message & { sources?: AssistantSource[] })[]; suggestions: Suggestion[]; available:boolean }>(`/api/ai/assistant?tenantId=${encodeURIComponent(tenantId)}&unitId=${encodeURIComponent(unitId)}`)
@@ -29,7 +30,7 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
       .catch(reason => { if (!cancelled) setError(reason instanceof Error ? reason.message : "Unable to load the assistant."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [open,scopeKey,tenantId,unitId]);
+  }, [visible,scopeKey,tenantId,unitId]);
 
   const pendingIds = useMemo(() => new Set(suggestions.map(item => item.id)),[suggestions]);
 
@@ -60,9 +61,15 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
   }
 
   return <div className="crm-assistant-anchor">
-    <button type="button" className="crm-icon-button" title="Open CRM assistant" aria-label="Open CRM assistant" aria-expanded={open} onClick={() => setOpen(value => !value)}><Sparkles size={18}/></button>
-    {open && <section className="crm-assistant-panel" role="dialog" aria-modal="false" aria-label="Panigale CRM assistant">
-      <header className="crm-assistant-header"><span className="crm-assistant-mark"><Sparkles size={17}/></span><div><strong>CRM assistant</strong><small>{unitName || "Select a business unit"}</small></div><button className="crm-icon-button" type="button" aria-label="Close assistant" onClick={() => setOpen(false)}><X size={17}/></button></header>
+    {!expanded && <button type="button" className="crm-icon-button" title="Open CRM assistant" aria-label="Open CRM assistant" aria-expanded={open} onClick={() => setOpen(value => !value)}><Sparkles size={18}/></button>}
+    {visible && <section className={`crm-assistant-panel ${expanded?"crm-assistant-expanded":""}`} role="dialog" aria-modal={expanded?"true":"false"} aria-label={expanded?"Panigale AI Workspace":"Panigale CRM assistant"}>
+      <header className="crm-assistant-header"><span className="crm-assistant-mark"><Sparkles size={17}/></span><div><strong>{expanded?"Panigale AI Workspace":"CRM assistant"}</strong><small>{unitName || "Select a business unit"} · Private to your account</small></div>{!expanded&&<button className="crm-icon-button crm-assistant-expand" type="button" title="Expand to AI Workspace" aria-label="Expand to AI Workspace" onClick={onExpand}><Maximize2 size={16}/></button>}{expanded&&<button className="crm-secondary crm-ai-back" type="button" onClick={onExitWorkspace}>Back to CRM</button>}<button className="crm-icon-button" type="button" aria-label={expanded?"Close AI Workspace":"Close assistant"} onClick={() => expanded?onExitWorkspace():setOpen(false)}><X size={17}/></button></header>
+      {expanded&&<div className="crm-ai-workspace-scroll"><div className="crm-ai-feature-grid">
+        <article><span className="crm-ai-feature-icon"><Sparkles size={17}/></span><div><strong>Relationship assistant</strong><small>Ask for account briefs, meeting prep, and follow-up ideas grounded in this unit’s CRM and authorized email.</small></div></article>
+        <article><span className="crm-ai-feature-icon green"><Mail size={17}/></span><div><strong>Inbox intelligence</strong><small>Connect personal Gmail privately or a shared unit inbox for authorized communication summaries and routing.</small></div></article>
+        <article><span className="crm-ai-feature-icon violet"><CalendarDays size={17}/></span><div><strong>Calendar & reminders</strong><small>Review your Google Calendar and CRM follow-ups. Email reminders begin when the company mail server is connected.</small></div></article>
+        <article><span className="crm-ai-feature-icon gold"><Check size={17}/></span><div><strong>Human approved email</strong><small>AI may draft a response. A teammate reviews and approves client emails before sending; simple receipts remain opt-in.</small></div></article>
+      </div><div className="crm-ai-workspace-grid"><section className="crm-ai-chat-card"><div className="crm-ai-section-head"><div><span className="crm-eyebrow">ASSISTANT</span><h2>What would you like to work on?</h2><p>Answers use records you can access in {unitName}. Source links open the underlying CRM record.</p></div><span className="crm-pill blue">{available?"Ready":"Setup needed"}</span></div>
       {!unitId ? <div className="crm-assistant-empty">Choose one business unit in the workspace bar to use the assistant. Its context stays within that unit.</div> : <>
         <div className="crm-assistant-messages" aria-live="polite">
           {loading && <p className="crm-assistant-status">Loading your private assistant history…</p>}
@@ -75,6 +82,9 @@ export function CrmAssistant({ tenantId, unitId, unitName, onOpenSource }: { ten
         <form className="crm-assistant-composer" onSubmit={send}><textarea aria-label="Ask the CRM assistant" placeholder={available?"Ask about this business unit…":"Assistant replies are not enabled yet."} value={draft} maxLength={6000} disabled={!available||busy} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void send();} }}/><button className="crm-primary" type="submit" disabled={!available||busy || !draft.trim()} aria-label="Send message"><Send size={16}/></button></form>
         <p className="crm-assistant-footnote" role={available?undefined:"status"}>{available?"AI suggestions may be wrong. Review before adding.":"AI assistance is currently disabled for this CRM. Your saved conversation remains available."}</p>
       </>}
+      </section><aside className="crm-ai-side-rail"><section className="crm-ai-side-card"><div className="crm-ai-section-head"><div><span className="crm-eyebrow">UP NEXT</span><h2>Your reminders</h2></div><button className="crm-panel-link" onClick={onOpenTasks}>All tasks</button></div>{reminders.length?reminders.slice(0,5).map(task=><div className="crm-ai-reminder" key={task.id}><span><strong>{String(task.title||"Follow up")}</strong><small>{String(task.company_name||task.contact_name||"CRM follow-up")}</small></span><small>{String(task.due_at||"").slice(0,10)}</small></div>):<p className="crm-ai-muted">No tasks assigned to you are due this week.</p>}<ReminderEmailSettings tenantId={tenantId}/></section>
+      <section className="crm-ai-side-card"><span className="crm-eyebrow">CONNECTED WORK</span><h2>Email & calendar</h2><p className="crm-ai-muted">Manage private Gmail and Calendar access, or connect an inbox assigned to this business unit.</p><GoogleConnections tenantId={tenantId} unitId={unitId} units={units}/></section>
+      <section className="crm-ai-side-card"><span className="crm-eyebrow">SAFE BY DEFAULT</span><h2>Review before action</h2><ul><li>CRM tasks and notes wait for your confirmation.</li><li>Client email drafts require human approval.</li><li>Shared inboxes are limited to authorized unit teammates.</li></ul><button className="crm-panel-link" onClick={onOpenEmail}>Open email approvals <Mail size={14}/></button></section></aside></div></div>}
     </section>}
   </div>;
 }
