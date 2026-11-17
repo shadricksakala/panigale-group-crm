@@ -86,6 +86,44 @@ function pillTone(status: unknown) {
 function EmptyState({ icon: Icon, title, detail, action }: { icon: typeof FileText; title: string; detail: string; action?: ReactNode }) {
   return <div className="crm-empty"><div><span className="crm-empty-icon"><Icon size={21}/></span><h3>{title}</h3><p>{detail}</p>{action && <div style={{ marginTop: 15 }}>{action}</div>}</div></div>;
 }
+type TopbarSelectorItem = { id:string; label:string; detail?:string; logo?:string; mark?:string };
+function UnitLogo({src,label,mark,className=""}:{src?:string;label:string;mark?:string;className?:string}) {
+  const [failed,setFailed]=useState(false);
+  useEffect(()=>setFailed(false),[src]);
+  return <span className={`crm-selector-logo ${className}`} aria-hidden="true">{src&&!failed?<img src={src} alt="" onError={()=>setFailed(true)}/>:<span>{mark||initials(label)}</span>}</span>;
+}
+function TopbarSelector({label,value,items,disabled,onChange}:{label:string;value:string;items:TopbarSelectorItem[];disabled?:boolean;onChange:(value:string)=>void}) {
+  const [open,setOpen]=useState(false);
+  const root=useRef<HTMLDivElement>(null);
+  const selected=items.find(item=>item.id===value)||items[0];
+  useEffect(()=>{
+    if(!open)return;
+    const dismiss=(event:PointerEvent)=>{if(!root.current?.contains(event.target as Node))setOpen(false);};
+    const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setOpen(false);};
+    window.addEventListener("pointerdown",dismiss);
+    window.addEventListener("keydown",closeOnEscape);
+    return()=>{window.removeEventListener("pointerdown",dismiss);window.removeEventListener("keydown",closeOnEscape);};
+  },[open]);
+  return <div className={`crm-select-wrap crm-topbar-selector ${open?"is-open":""}`} ref={root}>
+    <span>{label}</span>
+    <button type="button" className="crm-selector-trigger" aria-label={`${label}: ${selected?.label||"Choose"}`} aria-haspopup="listbox" aria-expanded={open} disabled={disabled} onClick={()=>setOpen(current=>!current)}>
+      {selected&&<UnitLogo src={selected.logo} label={selected.label} mark={selected.mark}/>}<strong>{selected?.label||"Choose"}</strong><ChevronDown size={15}/>
+    </button>
+    {open&&<div className="crm-selector-menu" role="listbox" aria-label={label}>{items.map(item=><button type="button" role="option" aria-selected={item.id===value} className="crm-selector-option" key={item.id} onClick={()=>{onChange(item.id);setOpen(false);}}><UnitLogo src={item.logo} label={item.label} mark={item.mark}/><span><strong>{item.label}</strong>{item.detail&&<small>{item.detail}</small>}</span>{item.id===value&&<Check size={15}/>}</button>)}</div>}
+  </div>;
+}
+function unitLogoFor(slug:string,name:string) {
+  const key=`${slug} ${name}`.toLowerCase().replaceAll("_","-");
+  if(key.includes("asil"))return "/brands/units/asil.svg";
+  if(key.includes("panipay"))return "/brands/units/panipay.svg";
+  if(key.includes("futurecampus"))return "/brands/units/futurecampus.png";
+  if(key.includes("euroza"))return "/brands/units/euroza.png";
+  if(key.includes("strongpoint"))return "/brands/units/strongpoint-capital.png";
+  if(key.includes("ultra-fx")||key.includes("ultrafx"))return "/brands/units/ultra-fx-academy.png";
+  if(key.includes("proventus"))return "/brands/units/proventus-show.png";
+  if(key.includes("zedpreneur"))return "/brands/units/zedpreneurs.png";
+  return undefined;
+}
 function Pill({ value }: { value: unknown }) {
   return <span className={`crm-pill ${pillTone(value)}`}>{titleCase(value)}</span>;
 }
@@ -233,6 +271,7 @@ export function CrmApp({ initialModule = "overview" }: { initialModule?: Module 
   const [stageManagerOpen,setStageManagerOpen]=useState(false);
   const searchInput=useRef<HTMLInputElement>(null);
   const mobileSearchInput=useRef<HTMLInputElement>(null);
+  const unitPreferenceScope=useRef("");
 
   useEffect(() => {
     try {
@@ -279,6 +318,15 @@ export function CrmApp({ initialModule = "overview" }: { initialModule?: Module 
       const tenantId = selectedTenant || workContext.tenant?.id || "";
       if (!tenantId || !workContext.tenant) { setData(emptyData); return; }
       if (!selectedTenant) setSelectedTenant(tenantId);
+      const preferenceScope=`${workContext.user.id}:${tenantId}`;
+      if(workContext.tenant.id===tenantId&&unitPreferenceScope.current!==preferenceScope){
+        unitPreferenceScope.current=preferenceScope;
+        const currentIsAllowed=workContext.units.some(unit=>unit.id===selectedUnit);
+        let remembered="";
+        if(!currentIsAllowed){try{remembered=window.localStorage.getItem(`panigale-crm:last-unit:${preferenceScope}`)||"";}catch{/* Keep the default all-unit view when storage is unavailable. */}}
+        const restored=workContext.units.some(unit=>unit.id===remembered)?remembered:"";
+        if(!currentIsAllowed&&restored!==selectedUnit)setSelectedUnit(restored);
+      }
       const path = (resource: string) => `/api/crm/${resource}${queryString(tenantId, selectedUnit)}`;
       const [dashboard, companies, contacts, leads, activities, projects, projectMembers, milestones, deliverables, projectRisks, proposals, proposalVersions, proposalTemplates, documents, documentVersions, invoices, payments, stages, members, reports] = await Promise.all([
         getJson<{ data: Row }>(path("dashboard")),
@@ -315,6 +363,13 @@ export function CrmApp({ initialModule = "overview" }: { initialModule?: Module 
   }, [selectedTenant, selectedUnit]);
 
   useEffect(() => { void load(true); }, [load]);
+  useEffect(()=>{
+    const tenantId=selectedTenant||context?.tenant?.id||"";
+    if(!context?.user||!context.tenant||context.tenant.id!==tenantId)return;
+    const preferenceScope=`${context.user.id}:${tenantId}`;
+    if(unitPreferenceScope.current!==preferenceScope||selectedUnit&&!context.units.some(unit=>unit.id===selectedUnit))return;
+    try{window.localStorage.setItem(`panigale-crm:last-unit:${preferenceScope}`,selectedUnit);}catch{/* The current selection still works when browser storage is unavailable. */}
+  },[context?.user.id,context?.tenant?.id,context?.units,selectedTenant,selectedUnit]);
   useEffect(() => {
     const onUnauthorized = () => { setContext(null); setData(emptyData); };
     window.addEventListener("crm:unauthorized", onUnauthorized);
@@ -576,9 +631,9 @@ export function CrmApp({ initialModule = "overview" }: { initialModule?: Module 
     <div className="crm-main">
       <header className="crm-topbar">
         <div className="crm-topbar-selectors">
-          <div className="crm-select-wrap"><span>Workspace</span><select aria-label="Workspace" value={context.tenant.id} onChange={event => { setSelectedTenant(event.target.value); setSelectedUnit(""); }} disabled={context.memberships.length < 2}>{context.memberships.map(tenant => <option key={tenant.id} value={tenant.id}>{tenant.name}</option>)}</select></div>
+          <TopbarSelector label="Workspace" value={context.tenant.id} disabled={context.memberships.length<2} items={context.memberships.map(tenant=>({id:tenant.id,label:tenant.name,logo:unitLogoFor(tenant.slug,tenant.name)}))} onChange={tenantId=>{setSelectedTenant(tenantId);setSelectedUnit("");}}/>
           <div className="crm-top-separator"/>
-          <div className="crm-select-wrap"><span>Business unit</span><select aria-label="Business unit" value={selectedUnit} onChange={event => setSelectedUnit(event.target.value)}><option value="">All my units</option>{context.units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></div>
+          <TopbarSelector label="Business unit" value={selectedUnit} items={[{id:"",label:"All my units",detail:"Across your assigned units",mark:"ALL"},...context.units.map(unit=>({id:unit.id,label:unit.name,detail:unit.category,logo:unitLogoFor(unit.slug,unit.name)}))]} onChange={setSelectedUnit}/>
         </div>
         <div className="crm-top-separator"/>
         <label className="crm-search"><Search size={17}/><input ref={searchInput} aria-label="Search CRM" placeholder={searchPlaceholder} value={search} onChange={event => setSearch(event.target.value)}/><span style={{ color: "#9ba6b8", fontSize: 10 }}>⌘ K</span></label>
