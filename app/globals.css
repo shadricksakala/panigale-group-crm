@@ -763,5 +763,63 @@ a { color: inherit; }
 .support-portal[data-theme="dark"][data-brand="euroza"] .support-language-menu{border-color:#425044;background:#202923}
 .support-portal[data-theme="dark"][data-brand="euroza"] .support-language-menu button{color:#e0e3d8}
 .support-portal[data-theme="dark"][data-brand="euroza"] .support-language-menu button:hover,.support-portal[data-theme="dark"][data-brand="euroza"] .support-language-menu button[aria-checked="true"]{background:#303b30;color:#dfce83}
+
+/* ZedPreneurs support portal brand */
+.support-portal[data-brand="zedpreneurs"]{background:#fff9ef;color:#173621}
+.support-portal[data-brand="zedpreneurs"] .support-portal-header{height:90px;border-color:#e4e8dc;background:#fff9ef}
+.support-portal-brand.zedpreneurs{gap:12px;color:#123a25}
+.support-zedpreneurs-logo-wrap{display:flex;width:142px;height:84px;flex:none;align-items:center;justify-content:center}
+.support-zedpreneurs-logo-wrap img{display:block;width:100%;height:100%;object-fit:contain}
+.support-portal[data-brand="zedpreneurs"] .support-brand-caption{color:#286241;font-weight:700}
+.support-portal[data-brand="zedpreneurs"] .support-portal-hero{border-block:1px solid #e2eadc;background:linear-gradient(112deg,#eaf5ec 0%,#f5f8ee 58%,#fff8e8 100%)}
+.support-portal[data-brand="zedpreneurs"] .support-portal-eyebrow{color:#168047}
+.support-portal[data-brand="zedpreneurs"] .support-portal-hero h1{color:#103922}
+.support-portal[data-brand="zedpreneurs"] .support-portal-hero p{color:#536b59}
+.support-portal[data-brand="zedpreneurs"] .support-portal-submit{background:linear-gradient(100deg,#0f6839,#27834b);box-shadow:0 6px 15px #0f683933}
+.support-portal[data-brand="zedpreneurs"] .support-portal-fields input:focus,.support-portal[data-brand="zedpreneurs"] .support-portal-fields select:focus,.support-portal[data-brand="zedpreneurs"] .support-portal-fields textarea:focus{border-color:#65a87b;box-shadow:0 0 0 3px #1680471a}
+.support-portal[data-brand="zedpreneurs"] .support-service-mark.zedpreneurs{border-radius:12px;background:#e5f1e5;color:#17663c;font-size:12px;letter-spacing:-.04em}
+.support-portal[data-brand="zedpreneurs"] .support-portal-note{background:#eff5e7;color:#458046}
+.support-portal[data-brand="zedpreneurs"] .support-portal-note strong{color:#285b36}
+.support-portal[data-brand="zedpreneurs"] .support-portal-success>strong{background:#e5f1e5;color:#17663c}
+.support-portal[data-brand="zedpreneurs"] .support-portal-success a{color:#17663c}
+@media(max-width:520px){.support-portal[data-brand="zedpreneurs"] .support-portal-header{height:70px}.support-zedpreneurs-logo-wrap{width:108px;height:64px}.support-portal[data-brand="zedpreneurs"] .support-brand-caption{margin-left:1px}}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"]{background:#071c13;color:#e5eee4}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-header,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-footer{border-color:#274534;background:#0b2418;color:#b7c8b8}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-brand{color:#f1f6ed}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-header-side{color:#b0c0b2}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-header-side i{background:#274534}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-header-side button{color:#d5e2d4}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-theme-toggle{border-color:#3b5945!important;color:#dce9dc!important}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-hero{border-color:#274534;background:linear-gradient(112deg,#102d1c 0%,#11291c 58%,#2b2a1a 100%)}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-eyebrow{color:#a9d375}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-hero h1{color:#f1f6ed}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-hero p{color:#bacaba}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-form,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside>section,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success{border-color:#274534;background:#0d2a1c;box-shadow:0 10px 28px #030d08aa}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-unit{border-color:#274534}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-unit strong,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside h2,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success h2{color:#eff5ed}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-unit>div span,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields label{color:#bdccbd}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-lock{color:#9bc2a3}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-service-mark.zedpreneurs{background:#173b25;color:#b4e875}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields input,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields select,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields textarea{border-color:#3b5945;background:#081e14;color:#eef5ed}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields input::placeholder,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields textarea::placeholder{color:#8fa392}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields select option{background:#0d2a1c;color:#eef5ed}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields input:focus,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields select:focus,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-fields textarea:focus{border-color:#9bc576;box-shadow:0 0 0 3px #a9d37522}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-upload{border-color:#47634e;color:#b6c9b6}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-upload strong{color:#d8e8d6}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-upload small,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-consent,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-private{color:#a8bda8}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-consent svg{color:#a9d375}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-submit{background:linear-gradient(100deg,#17683d,#2e8551);box-shadow:0 6px 16px #04100877;color:#f4f9f1}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside li>b{background:#173b25;color:#b4e875}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside li strong,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-shortcuts article strong{color:#e5eee4}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside li small,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-shortcuts article small{color:#afc0af}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-shortcuts article{border-color:#274534}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-shortcut-icon.blue,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-shortcut-icon.purple{background:#173b25;color:#b4e875}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-note{background:#172f20;color:#b4d68a}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-note strong{color:#daedb7}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-note small,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-aside footer{color:#afc0af}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success>span{background:#173b25;color:#8acb8e}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success p,.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success small{color:#b7c8b8}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success>strong{background:#173b25;color:#daedb7}
+.support-portal[data-theme="dark"][data-brand="zedpreneurs"] .support-portal-success a{color:#b4e875}
 @media(max-width:900px){.crm-assistant-panel.crm-assistant-expanded{top:58px;left:0;bottom:74px}.crm-ai-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-ai-workspace-grid{grid-template-columns:minmax(0,1fr)}.crm-ai-chat-card .crm-assistant-messages{height:42dvh}}
 @media(max-width:520px){.crm-assistant-panel.crm-assistant-expanded{top:55px;bottom:70px}.crm-assistant-expanded .crm-assistant-header{min-height:56px;padding:8px 10px;gap:7px}.crm-assistant-expanded .crm-assistant-header>div{flex-basis:100px}.crm-ai-workspace-scroll{padding:10px}.crm-ai-feature-grid{gap:7px;margin-bottom:10px}.crm-ai-feature-grid article{gap:7px;padding:9px}.crm-ai-feature-grid article strong{font-size:9px}.crm-ai-feature-grid article small{font-size:8px}.crm-ai-feature-icon{width:27px;height:27px}.crm-ai-section-head{padding:13px 12px 10px}.crm-ai-chat-card .crm-assistant-messages{height:38dvh}.crm-ai-back{font-size:9px}}

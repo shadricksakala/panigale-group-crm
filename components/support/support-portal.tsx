@@ -9,13 +9,13 @@ type Language = "en" | "fr" | "it";
 
 const copy = {
   en: {
-    clientSupport: "Client support", groupEyebrow: "PANIGALE GROUP SUPPORT", eurozaEyebrow: "EUROZA · CLIENT CARE", panipayEyebrow: "PANIPAY · CUSTOMER CARE",
-    received: "We’ve received your request.", eurozaTitle: "How can EUROZA help?", title: "How can we help?", receivedDetail: "Your request is with the right team. We’ll continue the conversation by email.",
-    eurozaIntro: "Tell us about your application, compliance, project, or service request. Our team will take it from here.", intro: "Tell us what you need and we’ll get your message to the right team.",
+    clientSupport: "Client support", groupEyebrow: "PANIGALE GROUP SUPPORT", eurozaEyebrow: "EUROZA · CLIENT CARE", panipayEyebrow: "PANIPAY · CUSTOMER CARE", zedpreneursEyebrow: "ZEDPRENEURS · VENTURE SUPPORT",
+    received: "We’ve received your request.", eurozaTitle: "How can EUROZA help?", zedpreneursTitle: "How can ZedPreneurs help?", title: "How can we help?", receivedDetail: "Your request is with the right team. We’ll continue the conversation by email.",
+    eurozaIntro: "Tell us about your application, compliance, project, or service request. Our team will take it from here.", zedpreneursIntro: "Tell us about your venture, training, opportunity, or partnership enquiry. We’ll route it to the ZedPreneurs team.", intro: "Tell us what you need and we’ll get your message to the right team.",
     requestSent: "Request sent successfully", referenceNumber: "Your reference number is", keepReference: "Keep this number handy. We’ll reply to the email address you provided.", anotherRequest: "Send another request",
-    eurozaUnit: "EUROZA Consulting · Compliance · Project delivery", groupUnit: "Panigale Group business unit", secure: "Secure", name: "Your name", email: "Email address", topic: "What can we help with?", selectTopic: "Select a topic", reference: "Reference", optional: "(optional)",
+    eurozaUnit: "EUROZA Consulting · Compliance · Project delivery", zedpreneursUnit: "ZedPreneurs · Zambia", zedpreneursBrand: "Support", groupUnit: "Panigale Group business unit", secure: "Secure", name: "Your name", email: "Email address", topic: "What can we help with?", selectTopic: "Select a topic", reference: "Reference", optional: "(optional)",
     panipayReference: "Payment, invoice, or escrow reference", eurozaReference: "Application or project reference", subject: "Subject", subjectPlaceholder: "A short summary of your request", message: "Message", messagePlaceholder: "Share the details we’ll need to help you…",
-    fullName: "Your full name", consentEuroza: "We’ll use your details only to respond to your EUROZA request and keep the conversation connected.", consent: "We’ll use your details to respond to this request and keep the conversation connected.",
+    fullName: "Your full name", consentEuroza: "We’ll use your details only to respond to your EUROZA request and keep the conversation connected.", consentZedPreneurs: "We’ll use your details only to respond to your ZedPreneurs request and keep the conversation connected.", consent: "We’ll use your details to respond to this request and keep the conversation connected.",
     shareDocument: "Need to share a document?", shareDocumentDetail: "Add your ticket number if you need to share a document later.", send: "Send request", private: "Your request is only visible to the relevant support team.",
     next: "What happens next", route: "We route your request", routeDetail: "Your message goes to the right product and team.", ticketNumber: "You receive a ticket number", ticketDetail: "Your request stays connected to a reference number.",
     byEmail: "Continue by email", byEmailDetail: "Reply directly when you need to add more information.", common: "Common requests", permit: "Permit and application support", permitDetail: "Application status, required documents or permit guidance",
@@ -25,13 +25,13 @@ const copy = {
     languageName: "English", dark: "Dark", light: "Light", switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode", error: "Support is temporarily unavailable.", sendError: "Unable to send your request. Please try again.",
   },
   fr: {
-    clientSupport: "Assistance client", groupEyebrow: "ASSISTANCE PANIGALE GROUP", eurozaEyebrow: "EUROZA · SERVICE CLIENT", panipayEyebrow: "PANIPAY · SERVICE CLIENT",
-    received: "Votre demande a bien été reçue.", eurozaTitle: "Comment EUROZA peut-elle vous aider ?", title: "Comment pouvons-nous vous aider ?", receivedDetail: "Votre demande est transmise à la bonne équipe. Nous poursuivrons par e-mail.",
-    eurozaIntro: "Décrivez votre demande concernant une démarche, la conformité, un projet ou un service. Notre équipe prend le relais.", intro: "Dites-nous ce dont vous avez besoin afin que nous transmettions votre message à la bonne équipe.",
+    clientSupport: "Assistance client", groupEyebrow: "ASSISTANCE PANIGALE GROUP", eurozaEyebrow: "EUROZA · SERVICE CLIENT", panipayEyebrow: "PANIPAY · SERVICE CLIENT", zedpreneursEyebrow: "ZEDPRENEURS · ASSISTANCE AUX ENTREPRENEURS",
+    received: "Votre demande a bien été reçue.", eurozaTitle: "Comment EUROZA peut-elle vous aider ?", zedpreneursTitle: "Comment ZedPreneurs peut-il vous aider ?", title: "Comment pouvons-nous vous aider ?", receivedDetail: "Votre demande est transmise à la bonne équipe. Nous poursuivrons par e-mail.",
+    eurozaIntro: "Décrivez votre demande concernant une démarche, la conformité, un projet ou un service. Notre équipe prend le relais.", zedpreneursIntro: "Parlez-nous de votre entreprise, d’une formation, d’une opportunité ou d’un partenariat. Nous transmettrons votre demande à l’équipe ZedPreneurs.", intro: "Dites-nous ce dont vous avez besoin afin que nous transmettions votre message à la bonne équipe.",
     requestSent: "Demande envoyée", referenceNumber: "Votre numéro de référence", keepReference: "Conservez ce numéro. Nous répondrons à l’adresse e-mail indiquée.", anotherRequest: "Envoyer une autre demande",
-    eurozaUnit: "EUROZA Conseil · Conformité · Gestion de projets", groupUnit: "Entité du groupe Panigale", secure: "Sécurisé", name: "Votre nom", email: "Adresse e-mail", topic: "Comment pouvons-nous vous aider ?", selectTopic: "Choisissez un sujet", reference: "Référence", optional: "(facultatif)",
+    eurozaUnit: "EUROZA Conseil · Conformité · Gestion de projets", zedpreneursUnit: "ZedPreneurs · Zambie", zedpreneursBrand: "Assistance", groupUnit: "Entité du groupe Panigale", secure: "Sécurisé", name: "Votre nom", email: "Adresse e-mail", topic: "Comment pouvons-nous vous aider ?", selectTopic: "Choisissez un sujet", reference: "Référence", optional: "(facultatif)",
     panipayReference: "Référence de paiement, facture ou séquestre", eurozaReference: "Référence de dossier ou de projet", subject: "Objet", subjectPlaceholder: "Résumez brièvement votre demande", message: "Message", messagePlaceholder: "Indiquez les détails nécessaires pour vous aider…",
-    fullName: "Votre nom complet", consentEuroza: "Vos coordonnées serviront uniquement à répondre à votre demande EUROZA et à suivre l’échange.", consent: "Vos coordonnées serviront à répondre à votre demande et à assurer le suivi de l’échange.",
+    fullName: "Votre nom complet", consentEuroza: "Vos coordonnées serviront uniquement à répondre à votre demande EUROZA et à suivre l’échange.", consentZedPreneurs: "Vos coordonnées serviront uniquement à répondre à votre demande ZedPreneurs et à suivre l’échange.", consent: "Vos coordonnées serviront à répondre à votre demande et à assurer le suivi de l’échange.",
     shareDocument: "Vous souhaitez transmettre un document ?", shareDocumentDetail: "Indiquez votre numéro de ticket pour joindre un document ultérieurement.", send: "Envoyer la demande", private: "Votre demande est visible uniquement par l’équipe concernée.",
     next: "Que se passe-t-il ensuite ?", route: "Votre demande est transmise", routeDetail: "Votre message est envoyé au bon produit et à la bonne équipe.", ticketNumber: "Vous recevez un numéro de ticket", ticketDetail: "Votre demande reste liée à un numéro de référence.",
     byEmail: "Poursuivez par e-mail", byEmailDetail: "Répondez directement pour ajouter des informations.", common: "Demandes fréquentes", permit: "Démarches et permis", permitDetail: "Suivi de dossier, pièces requises ou conseils sur les permis",
@@ -41,13 +41,13 @@ const copy = {
     languageName: "Français", dark: "Sombre", light: "Clair", switchToDark: "Activer le mode sombre", switchToLight: "Activer le mode clair", error: "Le service d’assistance est momentanément indisponible.", sendError: "Impossible d’envoyer votre demande. Veuillez réessayer.",
   },
   it: {
-    clientSupport: "Assistenza clienti", groupEyebrow: "ASSISTENZA PANIGALE GROUP", eurozaEyebrow: "EUROZA · ASSISTENZA CLIENTI", panipayEyebrow: "PANIPAY · ASSISTENZA CLIENTI",
-    received: "Abbiamo ricevuto la tua richiesta.", eurozaTitle: "Come può aiutarti EUROZA?", title: "Come possiamo aiutarti?", receivedDetail: "La tua richiesta è stata inoltrata al team corretto. Continueremo la conversazione via e-mail.",
-    eurozaIntro: "Descrivi la tua richiesta relativa a pratiche, conformità, progetti o servizi. Il nostro team ti assisterà.", intro: "Dicci di cosa hai bisogno e inoltreremo il messaggio al team corretto.",
+    clientSupport: "Assistenza clienti", groupEyebrow: "ASSISTENZA PANIGALE GROUP", eurozaEyebrow: "EUROZA · ASSISTENZA CLIENTI", panipayEyebrow: "PANIPAY · ASSISTENZA CLIENTI", zedpreneursEyebrow: "ZEDPRENEURS · SUPPORTO IMPRENDITORIALE",
+    received: "Abbiamo ricevuto la tua richiesta.", eurozaTitle: "Come può aiutarti EUROZA?", zedpreneursTitle: "Come può aiutarti ZedPreneurs?", title: "Come possiamo aiutarti?", receivedDetail: "La tua richiesta è stata inoltrata al team corretto. Continueremo la conversazione via e-mail.",
+    eurozaIntro: "Descrivi la tua richiesta relativa a pratiche, conformità, progetti o servizi. Il nostro team ti assisterà.", zedpreneursIntro: "Raccontaci della tua iniziativa, di una formazione, di un’opportunità o di una partnership. Inoltreremo la richiesta al team ZedPreneurs.", intro: "Dicci di cosa hai bisogno e inoltreremo il messaggio al team corretto.",
     requestSent: "Richiesta inviata", referenceNumber: "Il tuo numero di riferimento", keepReference: "Conserva questo numero. Risponderemo all’indirizzo e-mail indicato.", anotherRequest: "Invia un’altra richiesta",
-    eurozaUnit: "EUROZA Consulenza · Conformità · Progetti", groupUnit: "Società del gruppo Panigale", secure: "Protetto", name: "Nome", email: "Indirizzo e-mail", topic: "Come possiamo aiutarti?", selectTopic: "Seleziona un argomento", reference: "Riferimento", optional: "(facoltativo)",
+    eurozaUnit: "EUROZA Consulenza · Conformità · Progetti", zedpreneursUnit: "ZedPreneurs · Zambia", zedpreneursBrand: "Assistenza", groupUnit: "Società del gruppo Panigale", secure: "Protetto", name: "Nome", email: "Indirizzo e-mail", topic: "Come possiamo aiutarti?", selectTopic: "Seleziona un argomento", reference: "Riferimento", optional: "(facoltativo)",
     panipayReference: "Riferimento pagamento, fattura o escrow", eurozaReference: "Riferimento pratica o progetto", subject: "Oggetto", subjectPlaceholder: "Un breve riepilogo della richiesta", message: "Messaggio", messagePlaceholder: "Inserisci i dettagli utili per poterti aiutare…",
-    fullName: "Nome e cognome", consentEuroza: "Useremo i tuoi dati solo per rispondere alla richiesta EUROZA e mantenere la conversazione collegata.", consent: "Useremo i tuoi dati per rispondere alla richiesta e mantenere la conversazione collegata.",
+    fullName: "Nome e cognome", consentEuroza: "Useremo i tuoi dati solo per rispondere alla richiesta EUROZA e mantenere la conversazione collegata.", consentZedPreneurs: "Useremo i tuoi dati solo per rispondere alla richiesta ZedPreneurs e mantenere la conversazione collegata.", consent: "Useremo i tuoi dati per rispondere alla richiesta e mantenere la conversazione collegata.",
     shareDocument: "Devi inviare un documento?", shareDocumentDetail: "Aggiungi il numero del ticket se desideri inviare un documento in seguito.", send: "Invia richiesta", private: "La richiesta è visibile solo al team di assistenza interessato.",
     next: "Cosa succede ora", route: "Inoltriamo la richiesta", routeDetail: "Il messaggio arriva al prodotto e al team corretti.", ticketNumber: "Ricevi un numero di ticket", ticketDetail: "La richiesta resta collegata a un numero di riferimento.",
     byEmail: "Continua via e-mail", byEmailDetail: "Rispondi direttamente per aggiungere altre informazioni.", common: "Richieste frequenti", permit: "Pratiche e permessi", permitDetail: "Stato della pratica, documenti richiesti o indicazioni sui permessi",
@@ -78,6 +78,8 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
   const [languageOpen, setLanguageOpen] = useState(false);
   const panipay = portalSlug === "panipay";
   const euroza = portalSlug === "euroza";
+  const zedpreneurs = portalSlug === "zedpreneurs";
+  const zedLogoSrc = theme === "dark" ? "/brands/zedpreneurs-logo-dark.png" : "/brands/zedpreneurs-logo-light.png";
   const c = copy[language];
 
   useEffect(() => {
@@ -135,16 +137,16 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
     }
   }
 
-  const serviceName = portal?.service || (euroza ? "EUROZA" : panipay ? "PaniPay" : "Client support");
-  const brandName = euroza ? "EUROZA" : panipay ? "PaniPay" : "Panigale Group";
-  const brandCaption = euroza ? c.eurozaBrand : panipay ? c.panipayBrand : c.groupBrand;
-  const eyebrow = euroza ? c.eurozaEyebrow : panipay ? c.panipayEyebrow : c.groupEyebrow;
-  const unitName = euroza && portal?.unitName === "Euroza Consultancy" ? c.eurozaUnit : portal?.unitName || (euroza ? c.eurozaUnit : c.groupUnit);
+  const serviceName = portal?.service || (zedpreneurs ? "ZedPreneurs" : euroza ? "EUROZA" : panipay ? "PaniPay" : "Client support");
+  const brandName = zedpreneurs ? "ZedPreneurs" : euroza ? "EUROZA" : panipay ? "PaniPay" : "Panigale Group";
+  const brandCaption = zedpreneurs ? c.zedpreneursBrand : euroza ? c.eurozaBrand : panipay ? c.panipayBrand : c.groupBrand;
+  const eyebrow = zedpreneurs ? c.zedpreneursEyebrow : euroza ? c.eurozaEyebrow : panipay ? c.panipayEyebrow : c.groupEyebrow;
+  const unitName = zedpreneurs ? c.zedpreneursUnit : euroza && portal?.unitName === "Euroza Consultancy" ? c.eurozaUnit : portal?.unitName || (euroza ? c.eurozaUnit : c.groupUnit);
 
-  return <main className="support-portal" lang={language} data-theme={theme} data-brand={euroza ? "euroza" : panipay ? "panipay" : "group"}>
+  return <main className="support-portal" lang={language} data-theme={theme} data-brand={zedpreneurs ? "zedpreneurs" : euroza ? "euroza" : panipay ? "panipay" : "group"}>
     <header className="support-portal-header">
-      <a className={`support-portal-brand${euroza ? " euroza" : ""}`} href={euroza ? "https://euroza.panigale.tech" : panipay ? "https://panipay.panigale.tech" : "https://panigale.tech"} aria-label={`${brandName} support`}>
-        {euroza ? <span className="support-euroza-logo-wrap"><img src="/brands/euroza-logo.png" alt="EUROZA Consulting"/></span> : <span className="support-portal-mark">{panipay ? "P" : "P"}</span>}
+      <a className={`support-portal-brand${euroza ? " euroza" : ""}${zedpreneurs ? " zedpreneurs" : ""}`} href={zedpreneurs ? "https://zedprenuers.com" : euroza ? "https://euroza.panigale.tech" : panipay ? "https://panipay.panigale.tech" : "https://panigale.tech"} aria-label={`${brandName} support`}>
+        {euroza ? <span className="support-euroza-logo-wrap"><img src="/brands/euroza-logo.png" alt="EUROZA Consulting"/></span> : zedpreneurs ? <span className="support-zedpreneurs-logo-wrap"><img src={zedLogoSrc} alt="ZedPreneurs · Innovate, Build, Scale"/></span> : <span className="support-portal-mark">{panipay ? "P" : "P"}</span>}
         <span className="support-brand-caption">{brandCaption}</span>
       </a>
       <div className="support-portal-header-side"><span>{c.clientSupport}</span><i/>
@@ -162,8 +164,8 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
 
     <section className="support-portal-hero">
       <span className="support-portal-eyebrow"><Sparkles size={14}/>{eyebrow}</span>
-      <h1>{ticket ? c.received : euroza ? c.eurozaTitle : c.title}</h1>
-      <p>{ticket ? c.receivedDetail : euroza ? c.eurozaIntro : c.intro}</p>
+      <h1>{ticket ? c.received : zedpreneurs ? c.zedpreneursTitle : euroza ? c.eurozaTitle : c.title}</h1>
+      <p>{ticket ? c.receivedDetail : zedpreneurs ? c.zedpreneursIntro : euroza ? c.eurozaIntro : c.intro}</p>
     </section>
 
     {ticket ? <section className="support-portal-success">
@@ -173,7 +175,7 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
     </section> : <section className="support-portal-layout">
       <form className="support-portal-form" onSubmit={event => void submit(event)}>
         <div className="support-portal-unit">
-          <span className="support-service-mark">{panipay ? "P" : euroza ? "E" : "P"}</span>
+          <span className={`support-service-mark${zedpreneurs ? " zedpreneurs" : ""}`}>{zedpreneurs ? "ZP" : panipay ? "P" : euroza ? "E" : "P"}</span>
           <div><strong>{serviceName}</strong><span>{unitName}</span></div>
           <span className="support-portal-lock"><LockKeyhole size={13}/>{c.secure}</span>
         </div>
@@ -188,7 +190,7 @@ export function SupportPortal({ portalSlug }: { portalSlug: string }) {
           <label className="support-honeypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off"/></label>
         </div>
         <div className="support-portal-upload"><Paperclip size={16}/><span><strong>{c.shareDocument}</strong><small>{c.shareDocumentDetail}</small></span><CheckCircle2 size={16}/></div>
-        <p className="support-portal-consent"><ShieldCheck size={15}/>{euroza ? c.consentEuroza : c.consent}</p>
+        <p className="support-portal-consent"><ShieldCheck size={15}/>{zedpreneurs ? c.consentZedPreneurs : euroza ? c.consentEuroza : c.consent}</p>
         <button className="support-portal-submit" disabled={busy || !portal}>{busy ? <span className="support-portal-spinner"/> : <Send size={15}/>}<span>{c.send}</span></button>
         <p className="support-portal-private"><LockKeyhole size={12}/>{c.private}</p>
       </form>
